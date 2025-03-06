@@ -1,4 +1,4 @@
-package com.esempio.Ecommerce.service;
+/*package com.esempio.Ecommerce.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -33,7 +33,7 @@ public class JWTService {
      *
      * @param user
      * @return JWT
-     */
+
     public String generateJWT(LocalUser user) {
         return JWT.create()
                 .withClaim(USERNAME_KEY, user.getUsername())
@@ -47,7 +47,7 @@ public class JWTService {
      *
      * @param token
      * @return Nome utente
-     */
+
     public String getUsername(String token) {
         return JWT.decode(token).getClaim(USERNAME_KEY).asString();
     }
@@ -57,7 +57,7 @@ public class JWTService {
      *
      * @param token
      * @return Lista di ruoli
-     */
+
     public List<String> getRoles(String token) {
         DecodedJWT decodedJWT = JWT.decode(token);
         return decodedJWT.getClaim(ROLES_KEY).asList(String.class);
@@ -68,18 +68,16 @@ public class JWTService {
      *
      * @param token
      * @return Lista di ruoli del realm
-     */
+
     public List<String> getRealmRoles(String token) {
         DecodedJWT decodedJWT = JWT.decode(token);
         return decodedJWT.getClaim("realm_access.roles").asList(String.class);
     }
-
-    /**
      * Estrae i ruoli delle risorse dal token JWT
      *
      * @param token
      * @return Lista di ruoli delle risorse
-     */
+
     public List<String> getResourceRoles(String token) {
         DecodedJWT decodedJWT = JWT.decode(token);
         return decodedJWT.getClaim("resource_access.vercarix-rest-api.roles").asList(String.class);

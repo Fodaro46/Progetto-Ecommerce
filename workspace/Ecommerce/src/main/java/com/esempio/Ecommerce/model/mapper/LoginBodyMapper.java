@@ -1,4 +1,4 @@
-package com.esempio.Ecommerce.model.mapper;
+/*package com.esempio.Ecommerce.model.mapper;
 
 
 import com.esempio.Ecommerce.api.dto.LoginBody;
@@ -22,3 +22,4 @@ public class LoginBodyMapper {
         return loginBody;
     }
 }
+*/
