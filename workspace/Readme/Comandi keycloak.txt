@@ -1,0 +1,14 @@
+# Istruzioni per Avviare e Chiudere Keycloak
+
+## Avvio di Keycloak
+
+1. Apri il terminale di IntelliJ.
+2. Vai alla directory del progetto:
+   ```sh
+   cd C:\Users\loreg\OneDrive\Desktop\workspace
+Esegui:
+./start-keycloak.sh
+
+## Chiusura di Keycloak
+Control+C sul terminale
+taskkill /F /IM java.exe /T
