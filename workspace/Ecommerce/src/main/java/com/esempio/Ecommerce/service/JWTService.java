@@ -1,4 +1,4 @@
-/*package com.esempio.Ecommerce.service;
+package com.esempio.Ecommerce.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -33,7 +33,7 @@ public class JWTService {
      *
      * @param user
      * @return JWT
-
+**/
     public String generateJWT(LocalUser user) {
         return JWT.create()
                 .withClaim(USERNAME_KEY, user.getUsername())
@@ -57,7 +57,7 @@ public class JWTService {
      *
      * @param token
      * @return Lista di ruoli
-
+    **/
     public List<String> getRoles(String token) {
         DecodedJWT decodedJWT = JWT.decode(token);
         return decodedJWT.getClaim(ROLES_KEY).asList(String.class);
@@ -77,7 +77,7 @@ public class JWTService {
      *
      * @param token
      * @return Lista di ruoli delle risorse
-
+    */
     public List<String> getResourceRoles(String token) {
         DecodedJWT decodedJWT = JWT.decode(token);
         return decodedJWT.getClaim("resource_access.vercarix-rest-api.roles").asList(String.class);
