@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { KeycloakService } from './services/keycloak/keycloak.service';
+import { HeaderComponent } from './header/header.component';
 
 export function initializeKeycloak(keycloakService: KeycloakService) {
   return () => keycloakService.init();
@@ -12,7 +13,8 @@ export function initializeKeycloak(keycloakService: KeycloakService) {
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    HeaderComponent
   ],
   imports: [
     BrowserModule,
