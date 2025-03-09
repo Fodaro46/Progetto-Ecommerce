@@ -1,34 +1,23 @@
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
-
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { KeycloakService } from './services/keycloak/keycloak.service';
-import { HeaderComponent } from './header/header.component';
-
-export function initializeKeycloak(keycloakService: KeycloakService) {
-  return () => keycloakService.init();
-}
+import {KeycloakService} from './services/keycloak/keycloak.service';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HeaderComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule
-  ],
   providers: [
     {
       provide: APP_INITIALIZER,
-      useFactory: initializeKeycloak,
-      deps: [KeycloakService],
-      multi: true
+      useFactory: (keycloak: KeycloakService) => () => keycloak.init(),
+      multi: true,
+      deps: [KeycloakService]
     }
   ],
-  bootstrap: [AppComponent]
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    HttpClientModule,
+    // Aggiungi qui tutti i moduli Material necessari
+  ]
 })
-export class AppModule { }
+export class AppModule {}

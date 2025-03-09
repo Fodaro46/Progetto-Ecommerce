@@ -1,7 +1,7 @@
 package com.esempio.Ecommerce.service;
 
-import com.esempio.Ecommerce.model.Entity.CartItem;
-import com.esempio.Ecommerce.model.repository.CartItemRepository;
+import com.esempio.Ecommerce.domain.entity.CartItem;
+import com.esempio.Ecommerce.api.repository.CartItemRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

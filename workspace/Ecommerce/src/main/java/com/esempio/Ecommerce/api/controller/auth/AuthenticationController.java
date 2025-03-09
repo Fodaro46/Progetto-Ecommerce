@@ -1,37 +1,89 @@
 package com.esempio.Ecommerce.api.controller.auth;
 
-import org.springframework.http.ResponseEntity;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.JWTClaimsSet;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+
+import java.net.URI;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthenticationController {
 
+    private final RestTemplate restTemplate;
+    private final String JWKS_URL = "http://localhost:8080/realms/Vercarix/protocol/openid-connect/certs";
+
+    public AuthenticationController(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
     @GetMapping("/me")
-    public ResponseEntity<?> getLoggedInUserProfile(@AuthenticationPrincipal Jwt principal) {
-        // Usa il token JWT per ottenere le informazioni dell'utente
-        if (principal == null) {
+    public ResponseEntity<?> getLoggedInUserProfile(
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // Estrai informazioni dal token
-        String username = principal.getClaim("preferred_username");
-        String email = principal.getClaim("email");
-        return ResponseEntity.ok(Map.of("username", username, "email", email));
+        String token = authHeader.substring(7);
+
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+
+            // Verifica scadenza token
+            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+            if (claims.getExpirationTime().before(new Date())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token expired");
+            }
+
+            if (!verifyTokenSignature(signedJWT)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token signature");
+            }
+
+            return ResponseEntity.ok(Map.of(
+                    "username", claims.getStringClaim("preferred_username"),
+                    "email", claims.getStringClaim("email")
+            ));
+
+        } catch (ParseException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token format");
+        } catch (JWTVerificationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Server error");
+        }
     }
 
-    // Non necessario implementare /login o /register
-    // Keycloak gestisce già il login e la registrazione
+    private boolean verifyTokenSignature(SignedJWT signedJWT) throws JWTVerificationException {
+        try {
+            JWKSet jwkSet = JWKSet.load(URI.create(JWKS_URL).toURL());
+            RSAKey rsaKey = (RSAKey) jwkSet.getKeyByKeyId(signedJWT.getHeader().getKeyID());
 
-    // Endpoint per il logout
-    @GetMapping("/logout")
-    public String logout(@AuthenticationPrincipal Jwt authentication) {
-        // Reindirizza a Keycloak per il logout
-        String logoutUrl = "http://localhost:8083/realms/Vercarix/protocol/openid-connect/logout?redirect_uri=http://localhost:8083";
-        return "Redirecting to logout: " + logoutUrl;
+            if (rsaKey == null) {
+                throw new JWTVerificationException("Invalid key ID");
+            }
+
+            JWSVerifier verifier = new RSASSAVerifier(rsaKey.toRSAPublicKey());
+            return signedJWT.verify(verifier);
+        } catch (Exception e) {
+            throw new JWTVerificationException("Signature verification failed: " + e.getMessage());
+        }
+    }
+
+    // Aggiungi questa classe in un file separato o nella parte inferiore
+    private static class JWTVerificationException extends Exception {
+        public JWTVerificationException(String message) {
+            super(message);
+        }
     }
 }

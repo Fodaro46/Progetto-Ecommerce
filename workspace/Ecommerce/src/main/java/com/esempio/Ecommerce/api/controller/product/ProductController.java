@@ -1,6 +1,6 @@
 package com.esempio.Ecommerce.api.controller.product;
 
-import com.esempio.Ecommerce.model.Entity.Product;
+import com.esempio.Ecommerce.domain.entity.Product;
 import com.esempio.Ecommerce.service.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

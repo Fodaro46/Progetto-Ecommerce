@@ -1,7 +1,7 @@
 package com.esempio.Ecommerce.api.controller.Cart;
 
-import com.esempio.Ecommerce.model.Entity.Cart;
-import com.esempio.Ecommerce.model.Entity.CartItem;
+import com.esempio.Ecommerce.domain.entity.Cart;
+import com.esempio.Ecommerce.domain.entity.CartItem;
 import com.esempio.Ecommerce.service.CartService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

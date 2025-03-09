@@ -1,9 +1,9 @@
 package com.esempio.Ecommerce.service;
 
-import com.esempio.Ecommerce.model.Entity.Inventory;
-import com.esempio.Ecommerce.model.Entity.Product;
-import com.esempio.Ecommerce.model.repository.InventoryRepository;
-import com.esempio.Ecommerce.model.repository.ProductRepository;
+import com.esempio.Ecommerce.domain.entity.Inventory;
+import com.esempio.Ecommerce.domain.entity.Product;
+import com.esempio.Ecommerce.api.repository.InventoryRepository;
+import com.esempio.Ecommerce.api.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

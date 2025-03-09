@@ -1,11 +1,11 @@
 package com.esempio.Ecommerce.service;
 
-import com.esempio.Ecommerce.model.Entity.Cart;
-import com.esempio.Ecommerce.model.Entity.CartItem;
-import com.esempio.Ecommerce.model.Entity.Product;
-import com.esempio.Ecommerce.model.repository.CartItemRepository;
-import com.esempio.Ecommerce.model.repository.CartRepository;
-import com.esempio.Ecommerce.model.repository.ProductRepository;
+import com.esempio.Ecommerce.domain.entity.Cart;
+import com.esempio.Ecommerce.domain.entity.CartItem;
+import com.esempio.Ecommerce.domain.entity.Product;
+import com.esempio.Ecommerce.api.repository.CartItemRepository;
+import com.esempio.Ecommerce.api.repository.CartRepository;
+import com.esempio.Ecommerce.api.repository.ProductRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;

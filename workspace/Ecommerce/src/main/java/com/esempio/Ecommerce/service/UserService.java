@@ -1,10 +1,7 @@
 package com.esempio.Ecommerce.service;
 
-import com.esempio.Ecommerce.api.dto.LoginBody;
-import com.esempio.Ecommerce.api.dto.RegistrationBody;
-import com.esempio.Ecommerce.exception.UserAlreadyExistsException;
-import com.esempio.Ecommerce.model.Entity.LocalUser;
-import com.esempio.Ecommerce.model.repository.LocalUserRepository;
+import com.esempio.Ecommerce.domain.entity.LocalUser;
+import com.esempio.Ecommerce.api.repository.LocalUserRepository;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -13,42 +10,56 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-
-    private final LocalUserRepository localUserDAO;
-    private final EncryptionService encryptionService;
-    private final JWTService jwtService;
     private final LocalUserRepository localUserRepository;
 
-    public UserService(LocalUserRepository localUserDAO, EncryptionService encryptionService, JWTService jwtService, LocalUserRepository localUserRepository) {
-
-        this.localUserDAO = localUserDAO;
-        this.encryptionService = encryptionService;
-        this.jwtService = jwtService;
+    // Costruttore semplificato con solo le dipendenze necessarie
+    public UserService(LocalUserRepository localUserRepository) {
         this.localUserRepository = localUserRepository;
     }
-    public LocalUser registerUser(Jwt tokenuser){
-        String keycloakid = tokenuser.getClaimAsString("sub");
-        String email= tokenuser.getClaimAsString("email");
-        String first_name= tokenuser.getClaimAsString("given_name");
-        String last_name= tokenuser.getClaimAsString("family_name");
-        LocalUser l= new LocalUser();
-        l.setEmail(email);
-        l.setFirstName(first_name);
-        l.setLastName(last_name);
-        l.setId(keycloakid);
-        return localUserRepository.save(l);
+
+    public LocalUser registerOrUpdateUser(Jwt jwtToken) {
+        String keycloakId = jwtToken.getClaimAsString("sub");
+        Optional<LocalUser> existingUser = localUserRepository.findById(keycloakId);
+
+        LocalUser user = existingUser.orElseGet(LocalUser::new);
+
+        // Mappatura campi da Keycloak
+        user.setId(keycloakId);
+        user.setEmail(jwtToken.getClaimAsString("email"));
+        user.setFirstName(jwtToken.getClaimAsString("given_name"));
+        user.setLastName(jwtToken.getClaimAsString("family_name"));
+        // Campi aggiuntivi se necessario
+        // user.setProfilePicture(jwtToken.getClaimAsString("picture"));
+
+        return localUserRepository.save(user);
     }
-    public String loginUser(LoginBody loginBody){
-        Optional<LocalUser> opUser = localUserDAO.findByUsernameIgnoreCase(loginBody.getUsername());
-        if(opUser.isPresent()){
-            LocalUser user = opUser.get();
-            if(encryptionService.checkPassword(loginBody.getPassword(), user.getPassword())){
-                return jwtService.generateJWT(user);
-            }
+
+    // Nuovo metodo che puoi aggiungere per risolvere il problema
+    public LocalUser registerUser(Jwt jwtToken) {
+        String keycloakId = jwtToken.getClaimAsString("sub");
+        Optional<LocalUser> existingUser = localUserRepository.findById(keycloakId);
+
+        if (existingUser.isPresent()) {
+            throw new RuntimeException("Utente già registrato");
         }
-        return null;
+
+        LocalUser user = new LocalUser();
+
+        // Mappatura campi da Keycloak
+        user.setId(keycloakId);
+        user.setEmail(jwtToken.getClaimAsString("email"));
+        user.setFirstName(jwtToken.getClaimAsString("given_name"));
+        user.setLastName(jwtToken.getClaimAsString("family_name"));
+
+        return localUserRepository.save(user);
     }
-    public Optional<LocalUser>findLocalUserById(String userId){
+
+    public Optional<LocalUser> findLocalUserById(String userId) {
         return localUserRepository.findById(userId);
+    }
+
+    // Metodo opzionale per ricerca via email
+    public Optional<LocalUser> findLocalUserByEmail(String email) {
+        return localUserRepository.findByEmailIgnoreCase(email);
     }
 }

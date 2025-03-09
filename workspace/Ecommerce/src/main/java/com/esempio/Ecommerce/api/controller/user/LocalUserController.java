@@ -1,6 +1,6 @@
 package com.esempio.Ecommerce.api.controller.user;
 
-import com.esempio.Ecommerce.model.Entity.LocalUser;
+import com.esempio.Ecommerce.domain.entity.LocalUser;
 import com.esempio.Ecommerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
