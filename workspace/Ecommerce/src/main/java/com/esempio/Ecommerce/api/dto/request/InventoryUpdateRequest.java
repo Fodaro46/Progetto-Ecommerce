@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 @Builder
-public record OrderItemRequest(
+public record InventoryUpdateRequest(
         @NotNull Long productId,
-        @NotNull @Min(1) Integer quantity
+        @NotNull @Min(0) Integer quantity
 ) {}

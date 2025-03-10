@@ -1,10 +1,15 @@
 package com.esempio.Ecommerce.api.dto.request;
-import java.util.List;
+
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
+import java.util.List;
+
+@Builder
 public record OrderRequest(
         @NotNull Long addressId,
-        @NotEmpty List<OrderItemRequest> items,
+        @NotEmpty @Valid List<OrderItemRequest> items,
         String couponCode
 ) {}

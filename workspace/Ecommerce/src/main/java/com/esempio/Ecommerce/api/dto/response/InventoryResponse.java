@@ -3,13 +3,13 @@ package com.esempio.Ecommerce.api.dto.response;
 
 import lombok.Builder;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Builder
-public record OrderItemResponse(
+public record InventoryResponse(
+        Long id,
         Long productId,
         String productName,
-        BigDecimal unitPrice,
         Integer quantity,
-        BigDecimal subtotal
+        LocalDateTime updatedAt
 ) {}

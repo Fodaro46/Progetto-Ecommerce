@@ -4,8 +4,7 @@ import com.esempio.Ecommerce.api.dto.request.OrderRequest;
 import com.esempio.Ecommerce.api.dto.response.OrderResponse;
 import com.esempio.Ecommerce.domain.entity.Order;
 import org.mapstruct.Mapper;
-import org.springframework.web.bind.annotation.Mapping;
-
+import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
     OrderResponse toResponse(Order order);
