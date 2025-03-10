@@ -8,11 +8,10 @@ import com.esempio.Ecommerce.domain.entity.*;
 import com.esempio.Ecommerce.domain.enums.OrderStatus;
 import com.esempio.Ecommerce.exception.InsufficientStockException;
 import com.esempio.Ecommerce.exception.NotFoundException;
-import com.esempio.Ecommerce.repository.CouponRepository;
-import com.esempio.Ecommerce.repository.InventoryRepository;
-import com.esempio.Ecommerce.repository.OrderRepository;
-import com.esempio.Ecommerce.repository.ProductRepository;
-import com.esempio.Ecommerce.repository.UserRepository;
+import com.esempio.Ecommerce.api.repository.InventoryRepository;
+import com.esempio.Ecommerce.api.repository.OrderRepository;
+import com.esempio.Ecommerce.api.repository.ProductRepository;
+import com.esempio.Ecommerce.api.repository.LocalUserRepository;
 import com.esempio.Ecommerce.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +31,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final InventoryRepository inventoryRepository;
-    private final CouponRepository couponRepository;
-    private final UserRepository userRepository;
+    private final LocalUserRepository userRepository;
 
     @Override
     @Transactional
@@ -56,8 +54,6 @@ public class OrderServiceImpl implements OrderService {
 
         // Calcola il totale
         BigDecimal subtotal = calculateSubtotal(orderItems);
-        BigDecimal discount = applyCoupon(request.couponCode(), subtotal);
-        order.setTotal(subtotal.subtract(discount));
 
         // Salva l'ordine e aggiorna l'inventario
         Order savedOrder = orderRepository.save(order);
@@ -109,7 +105,7 @@ public class OrderServiceImpl implements OrderService {
                     }
 
                     // Crea l'item
-                    BigDecimal unitPrice = product.getPrice();
+                    BigDecimal unitPrice = BigDecimal.valueOf(product.getPrice());
                     BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(itemRequest.quantity()));
 
                     OrderItem orderItem = OrderItem.builder()
