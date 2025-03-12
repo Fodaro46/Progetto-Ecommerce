@@ -1,12 +1,12 @@
-export interface Inventory {
-  id: number;
+export interface OrderItem {
   productId: number;
   productName: string;
+  unitPrice: number;
   quantity: number;
-  updatedAt: Date;
+  subtotal: number;
 }
 
-export interface InventoryUpdateRequest {
+export interface OrderItemRequest {
   productId: number;
   quantity: number;
 }

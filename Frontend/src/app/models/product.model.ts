@@ -1,10 +1,20 @@
 export interface Product {
-  id?: number;
+  id: number;
   name: string;
-  shortDescription: string;
-  longDescription: string;
+  description: string;
   price: number;
-  inventoryQuantity?: number;
-  createdAt?: Date;
-  updatedAt?: Date;
+  imageUrl?: string;
+  category: string;
+  inStock: boolean;
+  availableQuantity: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ProductRequest {
+  name: string;
+  description: string;
+  price: number;
+  imageUrl?: string;
+  category: string;
 }

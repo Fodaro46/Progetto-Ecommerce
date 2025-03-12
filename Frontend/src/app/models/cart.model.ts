@@ -1,15 +1,16 @@
-export interface CartItem {
-  id?: number;
-  productId: number;
-  productName?: string;
-  quantity: number;
-  price?: number;
-  createdAt?: Date;
-}
+import {CartItem} from './cart-item.model';
 
 export interface Cart {
-  id?: number;
-  userId?: number;
+  id: number;
+  userId: string;
+  items: CartItem[];
+  totalPrice: number;
+  totalItems: number;
   isActive: boolean;
-  cartItems: CartItem[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CartRequest {
+  userId: string;
 }

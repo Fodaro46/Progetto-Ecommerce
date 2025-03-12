@@ -1,24 +1,17 @@
-export enum OrderStatus {
-  PENDING = 'PENDING',
-  PROCESSING = 'PROCESSING',
-  SHIPPED = 'SHIPPED',
-  DELIVERED = 'DELIVERED',
-  CANCELLED = 'CANCELLED'
-}
-
-export interface OrderItem {
-  productId: number;
-  productName?: string;
-  unitPrice: number;
-  quantity: number;
-  subtotal: number;
-}
+import {OrderItem, OrderItemRequest} from './order-item.model';
+import {OrderStatus} from './order-status.enum';
 
 export interface Order {
-  id?: number;
-  userEmail?: string;
+  id: number;
+  userEmail: string;
   status: OrderStatus;
   total: number;
   items: OrderItem[];
-  createdAt?: Date;
+  createdAt: Date;
+}
+
+export interface OrderRequest {
+  addressId: number;
+  items: OrderItemRequest[];
+  couponCode?: string;
 }

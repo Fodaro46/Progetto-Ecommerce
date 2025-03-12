@@ -1,11 +1,13 @@
-import {Address} from './address.model';
-
 export interface User {
-  id?: string;
+  id: string;
   email: string;
   firstName: string;
   lastName: string;
-  addresses?: Address[];
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+export interface UserRequest {
+  email: string;
+  firstName: string;
+  lastName: string;
 }

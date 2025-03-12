@@ -1,9 +1,10 @@
 export interface Address {
-  id?: number;
+  id: number;
   addressLine1: string;
   addressLine2?: string;
   city: string;
   country: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
