@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Product } from '../../models/product.model';
-import { ProductService } from 'src/app/services/product.service';
-import { CartService } from 'src/app/services/cart.service';
-import { AuthService } from 'src/app/services/auth.service';
+import { Product } from '../models/product.model';
+import { ProductService } from '../services/product.service';
+import { KeycloakService } from '../services/keycloak/keycloak.service';
+import { CartService } from '../services/cart.service';
 
 @Component({
   selector: 'app-product-list',
@@ -18,7 +18,7 @@ export class ProductListComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private cartService: CartService,
-    private authService: AuthService,
+    private keycloakService: KeycloakService,
     private router: Router
   ) { }
 
@@ -48,14 +48,14 @@ export class ProductListComponent implements OnInit {
 
   addToCart(product: Product): void {
     // Verifica se l'utente è autenticato
-    if (!this.authService.isAuthenticated()) {
+    if (this.keycloakService.isTokenExpired()) {
       this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
       return;
     }
 
     // Verifica se esiste un carrello
     if (!this.cartService.currentCart) {
-      const userId = this.authService.currentUserValue?.id;
+      const userId = (this.keycloakService.profile as any)?.id || '';
       if (!userId) return;
 
       this.cartService.createCart(userId)

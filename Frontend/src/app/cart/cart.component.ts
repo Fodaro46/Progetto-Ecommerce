@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Cart } from '../../models/cart.model';
-import { CartItem } from '../../models/cart-item.model';
-import { CartService } from '../../services/cart.service';
-import { AuthService } from '../../services/auth.service';
+import { Cart } from '../models/cart.model';
+import { CartItem } from '../models/cart-item.model';
+import { CartService } from '../services/cart.service';
+import { KeycloakService } from '../services/keycloak/keycloak.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -15,7 +15,7 @@ export class CartComponent implements OnInit {
 
   constructor(
     private cartService: CartService,
-    private authService: AuthService,
+    private keycloakService: KeycloakService,
     private router: Router
   ) {}
 
@@ -24,40 +24,59 @@ export class CartComponent implements OnInit {
   }
 
   loadCart(): void {
-    const userId = this.authService.getCurrentUser()?.id;
+    const userId = (this.keycloakService.profile as any)?.id || '';
     if (userId) {
-      this.cartService.getCart(userId).subscribe(
-        cart => {
+      this.cartService.getCart(userId).subscribe({
+        next: (cart) => {
           this.cart = cart;
         },
-        error => {
+        error: (error) => {
           console.error('Error loading cart', error);
         }
-      );
+      });
     }
   }
 
   updateQuantity(item: CartItem, newQuantity: number): void {
-    if (newQuantity > 0) {
-      this.cartService.updateCartItemQuantity(item.id, newQuantity)
-        .subscribe(() => {
-          this.loadCart();
+    if (newQuantity > 0 && this.cart) {
+      // Assumo che updateCartItemQuantity richieda cartId e itemId
+      this.cartService.updateCartItemQuantity(this.cart.id, item.id, newQuantity)
+        .subscribe({
+          next: () => {
+            this.loadCart();
+          },
+          error: (error) => {
+            console.error('Error updating quantity', error);
+          }
         });
     }
   }
 
   removeItem(itemId: number): void {
-    this.cartService.removeCartItem(itemId)
-      .subscribe(() => {
-        this.loadCart();
-      });
+    if (this.cart) {
+      // Assumo che removeCartItem richieda cartId e itemId
+      this.cartService.removeCartItem(this.cart.id, itemId)
+        .subscribe({
+          next: () => {
+            this.loadCart();
+          },
+          error: (error) => {
+            console.error('Error removing item', error);
+          }
+        });
+    }
   }
 
   clearCart(): void {
     if (this.cart) {
       this.cartService.clearCart(this.cart.id)
-        .subscribe(() => {
-          this.loadCart();
+        .subscribe({
+          next: () => {
+            this.loadCart();
+          },
+          error: (error) => {
+            console.error('Error clearing cart', error);
+          }
         });
     }
   }

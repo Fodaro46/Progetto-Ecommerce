@@ -1,12 +1,11 @@
-
-// src/app/services/cart.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { Cart, CartRequest } from '../models/cart.model';
 import { CartItem, CartItemRequest } from '../models/cart-item.model';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'

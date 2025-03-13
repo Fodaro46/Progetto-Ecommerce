@@ -4,12 +4,13 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { Cart, CartRequest } from '../models/cart.model';
 import { CartItem, CartItemRequest } from '../models/cart-item.model';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
-export class CartService {
+export class OrderService {
   private apiUrl = environment.apiUrl + '/carts';
   private cartItemsUrl = environment.apiUrl + '/cart-items';
 

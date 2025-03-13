@@ -1,0 +1,35 @@
+mat-toolbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2rem;
+
+  .logo img {
+    height: 40px;
+  }
+
+  .search-container {
+    flex: 1;
+    max-width: 500px;
+    margin: 0 2rem;
+  }
+
+  .mobile-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+
+    &.open {
+      display: block;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .desktop-icons {
+      display: none;
+    }
+  }
+}
