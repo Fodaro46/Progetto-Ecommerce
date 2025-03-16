@@ -19,7 +19,7 @@ public class Cart {
     private Long id;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private String userId;
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
@@ -37,13 +37,14 @@ public class Cart {
         this.id = id;
     }
 
-    public Long getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
+
 
     public Boolean getIsActive() {
         return isActive;

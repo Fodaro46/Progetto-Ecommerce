@@ -26,6 +26,11 @@ public class LocalUserController {
         if(l.isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Utente già registrato");
         }
-        return ResponseEntity.ok(userService.registerUser(tokenuser));
+        return ResponseEntity.ok(userService.registerOrUpdateUser(tokenuser));
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout() {
+        // Qui non facciamo altro che inviare una risposta per indicare il logout
+        return ResponseEntity.ok("Logout effettuato con successo. Rimuovi il token dal client.");
     }
 }

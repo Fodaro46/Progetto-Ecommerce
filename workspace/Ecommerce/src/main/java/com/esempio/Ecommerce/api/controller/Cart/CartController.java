@@ -4,6 +4,8 @@ import com.esempio.Ecommerce.domain.entity.Cart;
 import com.esempio.Ecommerce.domain.entity.CartItem;
 import com.esempio.Ecommerce.service.CartService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,9 +21,21 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    @GetMapping("/active/{userId}")
-    public ResponseEntity<Cart> getActiveCart(@PathVariable Long userId) {
+    private String getAuthenticatedUserId() {
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return jwt.getClaim("sub"); // Keycloak User ID (UUID)
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<Cart> getActiveCart() {
+        String userId = getAuthenticatedUserId();
         Optional<Cart> cart = cartService.getActiveCartForUser(userId);
+
+        // Se non esiste il carrello, crealo
+        if (!cart.isPresent()) {
+            cart = Optional.of(cartService.createNewCart(userId));  // Modificato il nome del metodo
+        }
+
         return cart.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -31,8 +45,9 @@ public class CartController {
         return ResponseEntity.ok(items);
     }
 
-    @PostMapping("/active/{userId}")
-    public ResponseEntity<Cart> addItemToCart(@PathVariable Long userId, @RequestBody CartItem cartItem) {
+    @PostMapping("/active")
+    public ResponseEntity<Cart> addItemToCart(@RequestBody CartItem cartItem) {
+        String userId = getAuthenticatedUserId();
         Cart cart = cartService.addItemToCart(userId, cartItem.getProduct().getId(), cartItem.getQuantity());
         return ResponseEntity.ok(cart);
     }

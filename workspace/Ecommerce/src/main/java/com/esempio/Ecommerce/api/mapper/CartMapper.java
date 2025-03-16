@@ -6,7 +6,6 @@ import com.esempio.Ecommerce.domain.entity.Cart;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {CartItemMapper.class})
@@ -30,15 +29,14 @@ public interface CartMapper {
     @Mapping(target = "cartItems", ignore = true)
     Cart toEntity(CartRequest cartRequest);
 
-    default BigDecimal calculateTotalPrice(Cart cart) {
+    default Double calculateTotalPrice(Cart cart) {
         if (cart.getCartItems() == null || cart.getCartItems().isEmpty()) {
-            return BigDecimal.ZERO;
+            return 0.0;
         }
 
         return cart.getCartItems().stream()
-                .map(item -> BigDecimal.valueOf(item.getProduct().getPrice())
-                        .multiply(BigDecimal.valueOf(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
+                .sum();
     }
 
     default Integer calculateTotalItems(Cart cart) {

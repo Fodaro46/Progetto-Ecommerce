@@ -24,7 +24,7 @@ export class CartComponent implements OnInit {
   }
 
   loadCart(): void {
-    const userId = (this.keycloakService.profile as any)?.id || '';
+    const userId = (this.keycloakService.profile as any)?.id;
     if (userId) {
       this.cartService.getCart(userId).subscribe({
         next: (cart) => {
@@ -34,13 +34,15 @@ export class CartComponent implements OnInit {
           console.error('Error loading cart', error);
         }
       });
+    } else {
+      console.warn('No user ID available');
     }
   }
 
   updateQuantity(item: CartItem, newQuantity: number): void {
     if (newQuantity > 0 && this.cart) {
-      // Assumo che updateCartItemQuantity richieda cartId e itemId
-      this.cartService.updateCartItemQuantity(this.cart.id, item.id, newQuantity)
+      // Using the correct method signature from CartService
+      this.cartService.updateCartItem(item.id, this.cart.id, newQuantity)
         .subscribe({
           next: () => {
             this.loadCart();
@@ -52,10 +54,10 @@ export class CartComponent implements OnInit {
     }
   }
 
-  removeItem(itemId: number): void {
+  removeItem(item: CartItem): void {
     if (this.cart) {
-      // Assumo che removeCartItem richieda cartId e itemId
-      this.cartService.removeCartItem(this.cart.id, itemId)
+      // Using the correct method signature from CartService
+      this.cartService.removeCartItem(item.id, this.cart.id)
         .subscribe({
           next: () => {
             this.loadCart();

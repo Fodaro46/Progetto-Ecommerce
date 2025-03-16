@@ -1,7 +1,6 @@
 package com.esempio.Ecommerce.api.dto.response;
 
 import lombok.Builder;
-import java.math.BigDecimal;
 
 @Builder
 public record CartItemResponse(
@@ -9,7 +8,7 @@ public record CartItemResponse(
         Long productId,
         String productName,
         String productImageUrl,
-        BigDecimal unitPrice,
+        Double unitPrice,
         Integer quantity,
-        BigDecimal totalPrice
+        Double totalPrice
 ) {}

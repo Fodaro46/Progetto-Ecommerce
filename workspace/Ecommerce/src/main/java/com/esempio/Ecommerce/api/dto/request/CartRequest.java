@@ -6,5 +6,5 @@ import lombok.Builder;
 @Builder
 public record CartRequest(
         @NotNull(message = "User ID is required")
-        Long userId
+        String userId
 ) {}

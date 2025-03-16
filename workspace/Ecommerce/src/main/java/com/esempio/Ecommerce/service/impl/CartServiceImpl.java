@@ -33,7 +33,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    public Cart addItemToCart(Long userId, Long productId, Integer quantity) {
+    public Cart addItemToCart(String userId, Long productId, Integer quantity) {
         Cart cart = cartRepository.findByUserIdAndIsActiveTrue(userId)
                 .orElseGet(() -> createNewCart(userId));
 
@@ -64,7 +64,7 @@ public class CartServiceImpl implements CartService {
         }
     }
 
-    private Cart createNewCart(Long userId) {
+    public Cart createNewCart(String userId) {
         Cart newCart = new Cart();
         newCart.setUserId(userId);
         newCart.setIsActive(true);
@@ -72,7 +72,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Optional<Cart> getActiveCartForUser(Long userId) {
+    public Optional<Cart> getActiveCartForUser(String userId) {
         return cartRepository.findByUserIdAndIsActiveTrue(userId);
     }
 

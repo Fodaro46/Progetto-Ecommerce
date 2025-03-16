@@ -15,6 +15,6 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
      * @param userId l'ID dell'utente
      * @return un Optional contenente il carrello attivo, se presente.
      */
-    Optional<Cart> findByUserIdAndIsActiveTrue(Long userId);
+    Optional<Cart> findByUserIdAndIsActiveTrue(String userId);
 }
 

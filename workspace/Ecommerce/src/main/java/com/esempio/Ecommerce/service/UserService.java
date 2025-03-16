@@ -7,7 +7,6 @@ import java.util.Optional;
 
 public interface UserService {
     LocalUser registerOrUpdateUser(Jwt jwtToken);
-    LocalUser registerUser(Jwt jwtToken);
     Optional<LocalUser> findLocalUserById(String userId);
     Optional<LocalUser> findLocalUserByEmail(String email);
 }

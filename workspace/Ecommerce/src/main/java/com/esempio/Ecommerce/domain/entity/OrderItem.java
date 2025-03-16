@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 
 @Data
 @Builder
@@ -30,9 +29,9 @@ public class OrderItem {
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(precision = 10, scale = 2, nullable = false)
-    private BigDecimal unitPrice;
+    @Column(nullable = false)
+    private Double unitPrice;
 
-    @Column(precision = 10, scale = 2, nullable = false)
-    private BigDecimal subtotal;
+    @Column(nullable = false)
+    private Double subtotal;
 }

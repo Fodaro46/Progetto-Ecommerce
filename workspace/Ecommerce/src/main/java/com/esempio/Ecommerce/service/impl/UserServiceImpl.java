@@ -2,6 +2,7 @@ package com.esempio.Ecommerce.service.impl;
 
 import com.esempio.Ecommerce.domain.entity.LocalUser;
 import com.esempio.Ecommerce.api.repository.LocalUserRepository;
+import com.esempio.Ecommerce.service.CartService;
 import com.esempio.Ecommerce.service.UserService;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -12,10 +13,12 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final LocalUserRepository localUserRepository;
+    private final CartService cartService;
 
     // Costruttore semplificato con solo le dipendenze necessarie
-    public UserServiceImpl(LocalUserRepository localUserRepository) {
+    public UserServiceImpl(LocalUserRepository localUserRepository, CartService cartService) {
         this.localUserRepository = localUserRepository;
+        this.cartService = cartService;
     }
 
     @Override
@@ -23,37 +26,36 @@ public class UserServiceImpl implements UserService {
         String keycloakId = jwtToken.getClaimAsString("sub");
         Optional<LocalUser> existingUser = localUserRepository.findById(keycloakId);
 
-        LocalUser user = existingUser.orElseGet(LocalUser::new);
+        // Assicurati che l'utente stia aggiornando solo i suoi dati
+        if (!existingUser.isPresent()) {
+            // Registrazione di un nuovo utente
+            LocalUser newUser = createNewUserFromToken(jwtToken);
+            localUserRepository.save(newUser);
 
-        // Mappatura campi da Keycloak
-        user.setId(keycloakId);
-        user.setEmail(jwtToken.getClaimAsString("email"));
-        user.setFirstName(jwtToken.getClaimAsString("given_name"));
-        user.setLastName(jwtToken.getClaimAsString("family_name"));
-        // Campi aggiuntivi se necessario
-        // user.setProfilePicture(jwtToken.getClaimAsString("picture"));
-
-        return localUserRepository.save(user);
+            // Crea un carrello per il nuovo utente
+            cartService.createNewCart(keycloakId);  // Usa cartService per creare un nuovo carrello
+            return newUser;
+        } else {
+            // Aggiornamento di un utente esistente
+            LocalUser user = existingUser.get();
+            updateUserWithTokenData(user, jwtToken);
+            return localUserRepository.save(user);
+        }
     }
 
-    @Override
-    public LocalUser registerUser(Jwt jwtToken) {
-        String keycloakId = jwtToken.getClaimAsString("sub");
-        Optional<LocalUser> existingUser = localUserRepository.findById(keycloakId);
-
-        if (existingUser.isPresent()) {
-            throw new RuntimeException("Utente già registrato");
-        }
-
+    private LocalUser createNewUserFromToken(Jwt jwtToken) {
         LocalUser user = new LocalUser();
-
-        // Mappatura campi da Keycloak
-        user.setId(keycloakId);
+        user.setId(jwtToken.getClaimAsString("sub"));
         user.setEmail(jwtToken.getClaimAsString("email"));
         user.setFirstName(jwtToken.getClaimAsString("given_name"));
         user.setLastName(jwtToken.getClaimAsString("family_name"));
+        return user;
+    }
 
-        return localUserRepository.save(user);
+    private void updateUserWithTokenData(LocalUser user, Jwt jwtToken) {
+        user.setEmail(jwtToken.getClaimAsString("email"));
+        user.setFirstName(jwtToken.getClaimAsString("given_name"));
+        user.setLastName(jwtToken.getClaimAsString("family_name"));
     }
 
     @Override

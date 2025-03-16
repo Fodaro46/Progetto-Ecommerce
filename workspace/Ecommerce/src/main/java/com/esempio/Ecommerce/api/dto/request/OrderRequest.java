@@ -10,6 +10,5 @@ import java.util.List;
 @Builder
 public record OrderRequest(
         @NotNull Long addressId,
-        @NotEmpty @Valid List<OrderItemRequest> items,
-        String couponCode
+        @NotEmpty @Valid List<OrderItemRequest> items
 ) {}

@@ -9,14 +9,13 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 import java.util.List;
-
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "name", source = "name")
     @Mapping(target = "description", source = "longDescription")
-    @Mapping(target = "price", expression = "java(BigDecimal.valueOf(product.getPrice()))")
+    @Mapping(target = "price", expression = "java(product.getPrice())") // usa direttamente Double
     @Mapping(target = "imageUrl", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "inStock", expression = "java(product.getInventory() != null && product.getInventory().getQuantity() > 0)")
@@ -31,7 +30,7 @@ public interface ProductMapper {
     @Mapping(target = "name", source = "name")
     @Mapping(target = "shortDescription", expression = "java(createShortDescription(productRequest))")
     @Mapping(target = "longDescription", source = "description")
-    @Mapping(target = "price", expression = "java(productRequest.price().doubleValue())")
+    @Mapping(target = "price", source = "price")
     @Mapping(target = "inventory", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -41,7 +40,7 @@ public interface ProductMapper {
     @Mapping(target = "name", source = "name")
     @Mapping(target = "shortDescription", expression = "java(createShortDescription(productRequest))")
     @Mapping(target = "longDescription", source = "description")
-    @Mapping(target = "price", expression = "java(productRequest.price().doubleValue())")
+    @Mapping(target = "price", source = "price")
     @Mapping(target = "inventory", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

@@ -18,8 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,7 +51,8 @@ public class OrderServiceImpl implements OrderService {
         order.setItems(orderItems);
 
         // Calcola il totale
-        BigDecimal subtotal = calculateSubtotal(orderItems);
+        Double subtotal = calculateSubtotal(orderItems);
+        order.setTotal(subtotal);
 
         // Salva l'ordine e aggiorna l'inventario
         Order savedOrder = orderRepository.save(order);
@@ -105,8 +104,8 @@ public class OrderServiceImpl implements OrderService {
                     }
 
                     // Crea l'item
-                    BigDecimal unitPrice = BigDecimal.valueOf(product.getPrice());
-                    BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(itemRequest.quantity()));
+                    Double unitPrice = product.getPrice();
+                    Double subtotal = unitPrice * itemRequest.quantity();
 
                     OrderItem orderItem = OrderItem.builder()
                             .order(order)
@@ -121,12 +120,11 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toList());
     }
 
-    private BigDecimal calculateSubtotal(List<OrderItem> items) {
+    private Double calculateSubtotal(List<OrderItem> items) {
         return items.stream()
-                .map(OrderItem::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .mapToDouble(item -> item.getSubtotal())
+                .sum();
     }
-
 
     private void updateInventory(List<OrderItem> items) {
         items.forEach(item -> {
