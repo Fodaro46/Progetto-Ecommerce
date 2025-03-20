@@ -12,6 +12,15 @@ target/
 .settings
 .springBeans
 .sts4-cache
+# Ignora le cartelle di configurazione dell'IDE
+.idea/
+workspace/.idea/
+
+# Ignora le dipendenze di Node.js
+node_modules/
+
+# Ignora la cache di Angular
+.angular/cache/
 
 ### IntelliJ IDEA ###
 .idea
