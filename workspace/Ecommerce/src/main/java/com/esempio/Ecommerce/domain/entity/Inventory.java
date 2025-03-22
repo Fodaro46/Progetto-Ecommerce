@@ -1,5 +1,6 @@
 package com.esempio.Ecommerce.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,7 @@ public class Inventory {
 
     @OneToOne
     @JoinColumn(name = "product_id", nullable = false, unique = true)
+    @JsonBackReference
     private Product product;
 
     @Version

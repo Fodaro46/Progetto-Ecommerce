@@ -1,53 +1,59 @@
 package com.esempio.Ecommerce.config;
 
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
 import java.util.*;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toSet;
 
 public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+
     @Override
-    public AbstractAuthenticationToken convert(@NonNull Jwt source) {
-        return new JwtAuthenticationToken(
-                source,
-                Stream.concat(
-                                new JwtGrantedAuthoritiesConverter().convert(source).stream(),
-                                extractResourceRoles(source).stream())
-                        .collect(toSet()));
+    public AbstractAuthenticationToken convert(Jwt jwt) {
+        Collection<GrantedAuthority> authorities = extractAuthorities(jwt);
+        return new JwtAuthenticationToken(jwt, authorities);
     }
 
-    @SuppressWarnings("unchecked")
-    private Collection<? extends GrantedAuthority> extractResourceRoles(Jwt jwt) {
-        Object resourceAccessObj = jwt.getClaim("resource_access");
-        if (!(resourceAccessObj instanceof Map<?, ?>)) {
-            return Collections.emptyList();
+    private Collection<GrantedAuthority> extractAuthorities(Jwt jwt) {
+        Set<GrantedAuthority> authorities = new HashSet<>();
+
+        // Estrai ruoli dal realm_access.roles
+        Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
+        if (realmAccess != null && realmAccess.containsKey("roles")) {
+            @SuppressWarnings("unchecked")
+            List<String> roles = (List<String>) realmAccess.get("roles");
+
+            // Aggiungi sia il formato "ROLE_rolename" che "rolename" per compatibilità
+            roles.forEach(role -> {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+                authorities.add(new SimpleGrantedAuthority(role));
+            });
         }
 
-        Map<String, Object> resourceAccess = (Map<String, Object>) resourceAccessObj;
-        Object accountObj = resourceAccess.get("account");
-        if (!(accountObj instanceof Map<?, ?>)) {
-            return Collections.emptyList();
+        // Estrai ruoli dal resource_access.{client-id}.roles
+        Map<String, Object> resourceAccess = jwt.getClaimAsMap("resource_access");
+        if (resourceAccess != null) {
+            resourceAccess.forEach((clientId, access) -> {
+                if (access instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> clientAccess = (Map<String, Object>) access;
+                    if (clientAccess.containsKey("roles")) {
+                        @SuppressWarnings("unchecked")
+                        List<String> clientRoles = (List<String>) clientAccess.get("roles");
+
+                        // Aggiungi sia con prefisso che senza
+                        clientRoles.forEach(role -> {
+                            authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+                            authorities.add(new SimpleGrantedAuthority(role));
+                        });
+                    }
+                }
+            });
         }
 
-        Map<String, Object> account = (Map<String, Object>) accountObj;
-        Object rolesObj = account.get("roles");
-        if (!(rolesObj instanceof List<?>)) {
-            return Collections.emptyList();
-        }
-
-        List<?> roles = (List<?>) rolesObj;
-        return roles.stream()
-                .filter(role -> role instanceof String)
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + ((String) role).replace("-", "_")))
-                .collect(toSet());
+        return authorities;
     }
 }

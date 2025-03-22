@@ -1,6 +1,7 @@
 package com.esempio.Ecommerce.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,6 +33,7 @@ public class Product {
     private Double price;
 
     @OneToOne(mappedBy = "product", cascade = CascadeType.REMOVE, optional = false, orphanRemoval = true)
+    @JsonManagedReference
     private Inventory inventory;
 
     @Column(name = "created_at", nullable = false, updatable = false)
