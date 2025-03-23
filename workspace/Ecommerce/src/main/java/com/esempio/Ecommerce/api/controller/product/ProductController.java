@@ -25,7 +25,22 @@ public class ProductController {
         return productService.getProducts();
     }
 
-    // Nuovo endpoint per aggiornare la quantità del prodotto
+    // Endpoint per ottenere un singolo prodotto per ID
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
+        ProductResponse response = productService.getProductById(id);
+        return ResponseEntity.ok(response);
+    }
+
+    // Endpoint per eliminare un prodotto (solo admin)
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Endpoint per aggiornare la quantità del prodotto
     @PutMapping("/{productId}/quantity")
     public ResponseEntity<Void> updateProductQuantity(
             @PathVariable Long productId,
@@ -33,6 +48,18 @@ public class ProductController {
         productService.updateProductQuantity(productId, newQuantity);
         return ResponseEntity.ok().build();
     }
+
+    // Endpoint per la ricerca/filtro dei prodotti
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductResponse>> searchProducts(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice) {
+        List<ProductResponse> results = productService.searchProducts(name, category, minPrice, maxPrice);
+        return ResponseEntity.ok(results);
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('admin')")
     public ResponseEntity<ProductResponse> addProduct(@Valid @RequestBody ProductRequest productRequest) {

@@ -23,6 +23,9 @@ public class Product {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
+    @Column(name = "category", nullable = false)
+    private String category;
+
     @Column(name = "short_description", nullable = false, unique = true)
     private String shortDescription;
 

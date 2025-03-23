@@ -156,4 +156,19 @@ public class OrderServiceImpl implements OrderService {
                 .createdAt(order.getCreatedAt())
                 .build();
     }
+    @Override
+    @Transactional
+    public OrderResponse updateOrderStatus(Long orderId, String newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Ordine non trovato: " + orderId));
+        try {
+            // Convertiamo la stringa in enum; se la stringa non è valida viene generata un'eccezione
+            OrderStatus statusEnum = OrderStatus.valueOf(newStatus.toUpperCase());
+            order.setStatus(statusEnum);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Stato dell'ordine non valido: " + newStatus);
+        }
+        Order updatedOrder = orderRepository.save(order);
+        return mapToOrderResponse(updatedOrder);
+    }
 }

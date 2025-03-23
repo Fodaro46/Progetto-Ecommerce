@@ -1,11 +1,13 @@
 package com.esempio.Ecommerce.service.impl;
 
+import com.esempio.Ecommerce.api.dto.request.UserRequest;
 import com.esempio.Ecommerce.domain.entity.LocalUser;
 import com.esempio.Ecommerce.api.repository.LocalUserRepository;
 import com.esempio.Ecommerce.service.CartService;
 import com.esempio.Ecommerce.service.UserService;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -27,7 +29,7 @@ public class UserServiceImpl implements UserService {
         Optional<LocalUser> existingUser = localUserRepository.findById(keycloakId);
 
         // Assicurati che l'utente stia aggiornando solo i suoi dati
-        if (!existingUser.isPresent()) {
+        if (existingUser.isEmpty()) {
             // Registrazione di un nuovo utente
             LocalUser newUser = createNewUserFromToken(jwtToken);
             localUserRepository.save(newUser);
@@ -67,4 +69,16 @@ public class UserServiceImpl implements UserService {
     public Optional<LocalUser> findLocalUserByEmail(String email) {
         return localUserRepository.findByEmailIgnoreCase(email);
     }
+
+    @Override
+    @Transactional
+    public LocalUser updateUser(String userId, UserRequest updateRequest) {
+        LocalUser user = localUserRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato: " + userId));
+        user.setEmail(updateRequest.email());
+        user.setFirstName(updateRequest.firstName());
+        user.setLastName(updateRequest.lastName());
+        return localUserRepository.save(user);
+    }
+
 }

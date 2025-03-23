@@ -1,8 +1,11 @@
 package com.esempio.Ecommerce.api.controller.Cart;
 
+import com.esempio.Ecommerce.api.dto.response.CartItemResponse;
 import com.esempio.Ecommerce.domain.entity.Cart;
 import com.esempio.Ecommerce.domain.entity.CartItem;
 import com.esempio.Ecommerce.service.CartService;
+import com.esempio.Ecommerce.service.CartItemService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -16,9 +19,12 @@ import java.util.Optional;
 public class CartController {
 
     private final CartService cartService;
+    private final CartItemService cartItemService;
 
-    public CartController(CartService cartService) {
+    @Autowired
+    public CartController(CartService cartService, CartItemService cartItemService) {
         this.cartService = cartService;
+        this.cartItemService = cartItemService;
     }
 
     private String getAuthenticatedUserId() {
@@ -32,7 +38,7 @@ public class CartController {
         Optional<Cart> cart = cartService.getActiveCartForUser(userId);
 
         // Se non esiste il carrello, crealo
-        if (!cart.isPresent()) {
+        if (cart.isEmpty()) {
             cart = Optional.of(cartService.createNewCart(userId));  // Modificato il nome del metodo
         }
 
@@ -50,5 +56,34 @@ public class CartController {
         String userId = getAuthenticatedUserId();
         Cart cart = cartService.addItemToCart(userId, cartItem.getProduct().getId(), cartItem.getQuantity());
         return ResponseEntity.ok(cart);
+    }
+
+    @PutMapping("/items/{itemId}")
+    public ResponseEntity<CartItemResponse> updateCartItemQuantity(
+            @PathVariable Long itemId,
+            @RequestParam Integer quantity) {
+        CartItemResponse response = cartItemService.updateItemQuantity(itemId, quantity);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/items/{itemId}")
+    public ResponseEntity<Void> removeCartItem(@PathVariable Long itemId) {
+        cartItemService.removeItem(itemId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/active")
+    public ResponseEntity<Void> clearCart() {
+        String userId = getAuthenticatedUserId();
+        // Ottieni il carrello attivo e rimuovi tutti gli item
+        Optional<Cart> activeCartOpt = cartService.getActiveCartForUser(userId);
+        if (activeCartOpt.isPresent()) {
+            Cart activeCart = activeCartOpt.get();
+            List<CartItem> items = cartService.getCartItems(activeCart.getId());
+            items.forEach(item -> cartItemService.removeItem(item.getId()));
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

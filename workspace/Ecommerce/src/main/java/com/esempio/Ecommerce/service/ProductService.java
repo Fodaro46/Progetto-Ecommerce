@@ -9,5 +9,8 @@ public interface ProductService {
     List<Product> getProducts();
     void updateProductQuantity(Long productId, int newQuantity);
     ProductResponse addProduct(ProductRequest productRequest);
+    ProductResponse getProductById(Long id);
+    void deleteProduct(Long id);
+    List<ProductResponse> searchProducts(String name, String category, Double minPrice, Double maxPrice);
 
 }
