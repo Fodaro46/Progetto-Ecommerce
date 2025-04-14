@@ -1,43 +1,47 @@
-// src/app/components/header/header.component.ts
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Cart } from '../../models/cart.model';
-import { User } from '../../models/user.model';
-import { AuthService } from '../../services/auth.service';
-import { CartService } from '../../services/cart.service';
+import { Cart } from '../models/cart.model';
+import { CartService } from '../services/cart.service';
+import { KeycloakService } from '../services/keycloak/keycloak.service';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss']
+  styleUrls: ['./header.component.scss'],
+  standalone: false,
 })
 export class HeaderComponent implements OnInit {
   isLoggedIn: boolean = false;
-  user: User | null = null;
+  user: any = null;
+
   cartItemCount$: Observable<number>;
 
   constructor(
-    private authService: AuthService,
+    private keycloakService: KeycloakService,
     private cartService: CartService,
     private router: Router
   ) {
-    this.cartItemCount$ = this.cartService.cart$.pipe(
+    this.cartItemCount$ = this.cartService.cart.pipe(
       map((cart: Cart | null) => {
-        if (!cart || !cart.cartItems) return 0;
-        return cart.cartItems.reduce((count, item) => count + item.quantity, 0);
+        if (!cart || !cart.items) return 0;
+        return cart.items.reduce((sum, item) => sum + item.quantity, 0);
       })
     );
   }
 
   ngOnInit(): void {
-    this.isLoggedIn = this.authService.isLoggedIn();
-    this.user = this.authService.getCurrentUser();
+    if (this.keycloakService.profile) {
+      this.isLoggedIn = true;
+      this.user = this.keycloakService.profile;
+    } else {
+      this.isLoggedIn = false;
+    }
   }
 
   logout(): void {
-    this.authService.logout();
+    this.keycloakService.logout();
     this.router.navigate(['/login']);
   }
 }

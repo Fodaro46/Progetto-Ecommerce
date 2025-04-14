@@ -1,4 +1,3 @@
-// src/app/components/header/header.component.html
 <header class="header">
   <div class="container">
     <div class="logo">
@@ -9,7 +8,9 @@
         <li><a routerLink="/products" routerLinkActive="active">Products</a></li>
         <li *ngIf="isLoggedIn">
           <a routerLink="/cart" routerLinkActive="active">
-            Cart <span *ngIf="(cartItemCount$ | async) > 0" class="badge">{{ cartItemCount$ | async }}</span>
+            Cart <ng-container *ngIf="(cartItemCount$ | async) as count">
+            <span *ngIf="count > 0" class="badge">{{ count }}</span>
+          </ng-container>
           </a>
         </li>
         <li *ngIf="isLoggedIn">

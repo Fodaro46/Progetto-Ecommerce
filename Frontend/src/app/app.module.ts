@@ -2,33 +2,50 @@ import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
+import { RouterModule, Routes } from '@angular/router';
+
 import { KeycloakService } from './services/keycloak/keycloak.service';
 import { CartService } from './services/cart.service';
+
+import { AppComponent } from './app.component';
 import { ProductListComponent } from './product-list/product-list.component';
 import { CartComponent } from './cart/cart.component';
+import { HeaderComponent } from './header/header.component';
+
+const routes: Routes = [
+  { path: '', redirectTo: 'products', pathMatch: 'full' },
+  { path: 'products', component: ProductListComponent },
+  { path: 'cart', component: CartComponent },
+  // Aggiungi qui altre rotte necessarie (es. checkout, ordini, ecc.)
+];
+
+export function keycloakInitializer(keycloak: KeycloakService) {
+  return (): Promise<any> => keycloak.init();
+}
 
 @NgModule({
   declarations: [
+    AppComponent,
     ProductListComponent,
-    CartComponent
-    // Aggiungi qui altri componenti dell'applicazione
+    CartComponent,
+    HeaderComponent
+  ],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    HttpClientModule,
+    RouterModule.forRoot(routes)
   ],
   providers: [
     CartService,
     KeycloakService,
     {
       provide: APP_INITIALIZER,
-      useFactory: (keycloak: KeycloakService) => () => keycloak.init(),
+      useFactory: keycloakInitializer,
       multi: true,
       deps: [KeycloakService]
     }
   ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    HttpClientModule
-    // Aggiungi qui altri moduli necessari come RouterModule, FormModule, ecc.
-  ],
-  bootstrap: [/* Aggiungi qui il componente principale dell'applicazione */]
+  bootstrap: [AppComponent]
 })
 export class AppModule {}
