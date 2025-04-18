@@ -8,9 +8,10 @@ import { KeycloakService } from './services/keycloak/keycloak.service';
 import { CartService } from './services/cart.service';
 
 import { AppComponent } from './app.component';
-import { ProductListComponent } from './product-list/product-list.component';
-import { CartComponent } from './cart/cart.component';
-import { HeaderComponent } from './header/header.component';
+import { ProductListComponent } from './components/product-list/product-list.component';
+import { CartComponent } from './components/cart/cart.component';
+import { HeaderComponent } from './components/header/header.component';
+import { ProductCreateComponent } from './components/product-create/product-create.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'products', pathMatch: 'full' },
@@ -28,7 +29,8 @@ export function keycloakInitializer(keycloak: KeycloakService) {
     AppComponent,
     ProductListComponent,
     CartComponent,
-    HeaderComponent
+    HeaderComponent,
+    ProductCreateComponent
   ],
   imports: [
     BrowserModule,

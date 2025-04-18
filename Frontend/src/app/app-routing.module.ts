@@ -1,26 +1,27 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AuthGuard } from './services/guard/auth.guard';
-import { CartComponent } from './cart/cart.component';
-import { ProductListComponent } from './product-list/product-list.component';
+import { AuthGuard } from './core/guard/auth.guard';
+import { CartComponent } from './components/cart/cart.component';
+import { ProductListComponent } from './components/product-list/product-list.component';
+import {ProductCreateComponent} from './components/product-create/product-create.component';
 
 const routes: Routes = [
   {
-    path: 'carrello',
+    path: 'cart',
     component: CartComponent,
     canActivate: [AuthGuard]
   },
   {
-    path: 'prodotti',
+    path: 'products',
     component: ProductListComponent
   },
   {
     path: '',
-    redirectTo: 'prodotti',
+    redirectTo: 'products',
     pathMatch: 'full'
-  }
+  },
+  { path: 'admin/create-product', component: ProductCreateComponent }
 ];
-
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]

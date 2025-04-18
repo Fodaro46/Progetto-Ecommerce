@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Cart } from '../models/cart.model';
-import { CartService } from '../services/cart.service';
-import { KeycloakService } from '../services/keycloak/keycloak.service';
+import { Cart } from '../../models/cart.model';
+import { CartService } from '../../services/cart.service';
+import { KeycloakService } from '../../services/keycloak/keycloak.service';
 
 @Component({
   selector: 'app-header',

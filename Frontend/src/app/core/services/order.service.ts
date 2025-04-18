@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { Cart, CartRequest } from '../models/cart.model';
-import { CartItem, CartItemRequest } from '../models/cart-item.model';
+import { Cart, CartRequest } from '../shared/models/cart.model';
+import { CartItem, CartItemRequest } from '../shared/models/cart-item.model';
 import { environment } from '../../environments/environment';
 
 

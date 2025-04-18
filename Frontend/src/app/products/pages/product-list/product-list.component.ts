@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Product } from '../models/product.model';
-import { ProductService } from '../services/product.service';
-import { KeycloakService } from '../services/keycloak/keycloak.service';
-import { CartService } from '../services/cart.service';
+import { Product } from '../../models/product.model';
+import { ProductService } from '../../services/product.service';
+import { KeycloakService } from '../../services/keycloak/keycloak.service';
+import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-product-list',

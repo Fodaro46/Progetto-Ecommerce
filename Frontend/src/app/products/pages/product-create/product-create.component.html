@@ -1,0 +1,21 @@
+<div class="product-create">
+  <h2>Crea un nuovo prodotto</h2>
+  <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+    <label>Nome</label>
+    <input formControlName="name" type="text">
+
+    <label>Descrizione</label>
+    <textarea formControlName="description"></textarea>
+
+    <label>Prezzo</label>
+    <input formControlName="price" type="number" step="0.01">
+
+    <label>Quantità in magazzino</label>
+    <input formControlName="stockQuantity" type="number">
+
+    <label>Immagine (URL)</label>
+    <input formControlName="imageUrl" type="text">
+
+    <button type="submit" [disabled]="productForm.invalid">Crea</button>
+  </form>
+</div>

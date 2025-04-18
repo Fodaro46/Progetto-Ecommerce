@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Cart } from '../models/cart.model';
-import { CartItem } from '../models/cart-item.model';
-import { CartService } from '../services/cart.service';
-import { KeycloakService } from '../services/keycloak/keycloak.service';
+import { Cart } from '../../models/cart.model';
+import { CartItem } from '../../models/cart-item.model';
+import { CartService } from '../../services/cart.service';
+import { KeycloakService } from '../../services/keycloak/keycloak.service';
 import { Router } from '@angular/router';
 
 @Component({
