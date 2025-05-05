@@ -1,0 +1,37 @@
+<div class="cart-container" *ngIf="cart">
+  <h2>Il tuo carrello</h2>
+
+  <div *ngIf="cart.items.length > 0; else emptyCart">
+    <div class="cart-item" *ngFor="let item of cart.items">
+      <div class="item-info">
+        <p><strong>{{ item.productName }}</strong></p>
+        <img [src]="item.productImageUrl" alt="{{ item.productName }}" width="80" height="80" style="object-fit: cover; border-radius: 0.5rem;" />
+        <p>Prezzo unitario: €{{ item.unitPrice }}</p>
+        <p>Quantità:
+          <input
+            type="number"
+            [value]="item.quantity"
+            min="1"
+            #qtyInput
+            (change)="updateQuantity(item, qtyInput.valueAsNumber)" />
+        </p>
+        <p>Totale: €{{ item.totalPrice }}</p>
+      </div>
+      <button (click)="removeItem(item)">Rimuovi</button>
+    </div>
+
+    <div class="cart-summary">
+      <p><strong>Totale prodotti:</strong> {{ cart.totalItems }}</p>
+      <p><strong>Prezzo totale:</strong> €{{ cart.totalPrice }}</p>
+    </div>
+
+    <div class="cart-actions">
+      <button (click)="clearCart()">Svuota carrello</button>
+      <button (click)="proceedToCheckout()">Procedi al checkout</button>
+    </div>
+  </div>
+
+  <ng-template #emptyCart>
+    <p>Il tuo carrello è vuoto.</p>
+  </ng-template>
+</div>

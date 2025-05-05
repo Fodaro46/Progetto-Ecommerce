@@ -1,0 +1,47 @@
+.order-list {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+.order-item {
+  margin: 15px 0;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.order-item:hover {
+  background-color: #f1f1f1;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+}
+
+.order-detail {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #ccc;
+}
+
+.order-item-detail {
+  margin-bottom: 10px;
+}
+
+.order-item-detail p {
+  margin: 5px 0;
+}
+
+h2 {
+  text-align: center;
+  font-size: 1.5em;
+}
+
+h3 {
+  font-size: 1.2em;
+}
