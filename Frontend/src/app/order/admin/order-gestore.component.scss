@@ -1,0 +1,77 @@
+.order-list {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+h2 {
+  text-align: center;
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+.order-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.order-item {
+  margin: 15px 0;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.order-item:hover {
+  background-color: #f0f0f0;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.order-detail {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.order-item-detail {
+  margin-bottom: 10px;
+}
+
+.order-item-detail p {
+  margin: 5px 0;
+}
+
+.order-item-detail strong {
+  font-weight: bold;
+}
+
+.status-completed {
+  color: green;
+}
+
+.status-pending {
+  color: orange;
+}
+
+.no-orders {
+  text-align: center;
+  font-size: 1.2em;
+  color: #888;
+}
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}

@@ -18,14 +18,20 @@ export class OrderService {
     );
   }
 
-    getUserOrders(userId: any): Observable<OrderResponse[]> {
-    return this.http.get<OrderResponse[]>(this.apiUrl).pipe(
+  getUserOrders(): Observable<OrderResponse[]> {
+    return this.http.get<OrderResponse[]>(`${this.apiUrl}/my`).pipe(
       catchError(error => throwError(() => error))
     );
   }
 
   getOrderById(id: number): Observable<OrderResponse> {
     return this.http.get<OrderResponse>(`${this.apiUrl}/${id}`).pipe(
+      catchError(error => throwError(() => error))
+    );
+  }
+
+  updateOrderStatus(orderId: number, newStatus: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${orderId}/status`, { status: newStatus }).pipe(
       catchError(error => throwError(() => error))
     );
   }

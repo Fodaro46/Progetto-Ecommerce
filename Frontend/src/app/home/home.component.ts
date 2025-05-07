@@ -1,14 +1,16 @@
-// home.component.ts
 import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { KeycloakService } from '@services/keycloak.service';
 import { filter, Subscription } from 'rxjs';
 import { NavbarComponent } from '@shared/navbar/navbar.component';
+import { ProductService } from '@services/product.service';
+import { ProductResponse } from '@models/product-response.model';
+
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule,NavbarComponent],
+  imports: [CommonModule, RouterModule, NavbarComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
@@ -20,50 +22,16 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   private videoLoadAttempts: number = 0;
   private maxVideoLoadAttempts: number = 3;
 
-  recommendedProducts = [
-    {
-      name: 'T-Shirt V3rc1',
-      description: '100% cotone organico',
-      imageUrl: 'assets/products/shirt.jpg',
-      fallbackImageUrl: 'assets/placeholder.jpg'
-    },
-    {
-      name: 'Pantaloncini Training',
-      description: 'Leggeri e resistenti',
-      imageUrl: 'assets/products/shorts.jpg',
-      fallbackImageUrl: 'assets/placeholder.jpg'
-    },
-    {
-      name: 'Felpa Oversize',
-      description: 'Comfort per ogni stagione',
-      imageUrl: 'assets/products/hoodie.jpg',
-      fallbackImageUrl: 'assets/placeholder.jpg'
-    },
-    {
-      name: 'Cappellino Nero',
-      description: 'Stile minimal',
-      imageUrl: 'assets/products/cap.jpg',
-      fallbackImageUrl: 'assets/placeholder.jpg'
-    },
-    {
-      name: 'Borraccia V3rc1',
-      description: 'Mantiene freddo o caldo',
-      imageUrl: 'assets/products/bottle.jpg',
-      fallbackImageUrl: 'assets/placeholder.jpg'
-    },
-    {
-      name: 'Scarpe Training',
-      description: 'Aderenza e stabilità',
-      imageUrl: 'assets/products/shoes.jpg',
-      fallbackImageUrl: 'assets/placeholder.jpg'
-    }
-  ];
+  recommendedProducts: ProductResponse[] = [];
+  loading = false;
+  error: string | null = null;
 
   constructor(
     private keycloakService: KeycloakService,
     private router: Router,
     private renderer: Renderer2,
-    private el: ElementRef
+    private el: ElementRef,
+    private productService: ProductService
   ) {}
 
   ngOnInit(): void {
@@ -83,6 +51,9 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
       // Reset video when we navigate to this component
       setTimeout(() => this.resetBackgroundVideo(), 50);
     });
+
+    // Load recommended products dynamically
+    this.loadRecommendedProducts();
   }
 
   ngAfterViewInit(): void {
@@ -264,6 +235,22 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   onImageError(product: any): void {
     console.warn(`Failed to load image: ${product.imageUrl}`);
     product.imageUrl = product.fallbackImageUrl;
+  }
+
+  // Load recommended products dynamically from the backend
+  private loadRecommendedProducts(): void {
+    this.loading = true;
+    this.productService.getAllProducts().subscribe({
+      next: (data: ProductResponse[]) => {
+        this.recommendedProducts = data.slice(0, 7); // Limit to the first 7 products
+        this.loading = false;
+      },
+      error: err => {
+        console.error(err);
+        this.error = 'Errore durante il caricamento dei prodotti consigliati.';
+        this.loading = false;
+      }
+    });
   }
 
   login(): void {

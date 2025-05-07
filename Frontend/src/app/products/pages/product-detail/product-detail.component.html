@@ -1,0 +1,13 @@
+<div *ngIf="loading">Caricamento prodotto...</div>
+<div *ngIf="error">{{ error }}</div>
+
+<div *ngIf="product" class="product-detail">
+  <div class="img-container">
+    <img [src]="product.imageUrl" alt="{{ product.name }}" />
+  </div>
+  <h2>{{ product.name }}</h2>
+  <p>{{ product.description }}</p>
+  <p><strong>Prezzo:</strong> {{ product.price | currency }}</p>
+  <p><strong>Disponibilità:</strong> {{ product.inStock ? 'Disponibile' : 'Non disponibile' }}</p>
+  <button (click)="addToCart(product)" [disabled]="!product.inStock">Aggiungi al carrello</button>
+</div>

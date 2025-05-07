@@ -1,0 +1,80 @@
+<div class="product-create">
+  <h2>Crea nuovo prodotto</h2>
+
+  <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="name">Nome:</label>
+      <input
+        id="name"
+        formControlName="name"
+        [ngClass]="{'invalid': hasError('name')}" />
+      <span class="error" *ngIf="hasError('name')">
+        {{ getErrorMessage('name') }}
+      </span>
+    </div>
+
+    <!-- Aggiunto campo categoria -->
+    <div class="form-group">
+      <label for="category">Categoria:</label>
+      <input
+        id="category"
+        formControlName="category"
+        [ngClass]="{'invalid': hasError('category')}" />
+      <span class="error" *ngIf="hasError('category')">
+        {{ getErrorMessage('category') }}
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Descrizione:</label>
+      <textarea
+        id="description"
+        formControlName="description"
+        rows="3"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="price">Prezzo:</label>
+      <input
+        id="price"
+        type="number"
+        formControlName="price"
+        step="0.01"
+        [ngClass]="{'invalid': hasError('price')}" />
+      <span class="error" *ngIf="hasError('price')">
+        {{ getErrorMessage('price') }}
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="stockQuantity">Quantità in magazzino:</label>
+      <input
+        id="stockQuantity"
+        type="number"
+        formControlName="stockQuantity"
+        [ngClass]="{'invalid': hasError('stockQuantity')}" />
+      <span class="error" *ngIf="hasError('stockQuantity')">
+        {{ getErrorMessage('stockQuantity') }}
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="imageUrl">URL Immagine:</label>
+      <input
+        id="imageUrl"
+        formControlName="imageUrl" />
+    </div>
+
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="submit"
+        [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Creazione in corso...' : 'Crea' }}
+      </button>
+    </div>
+  </form>
+</div>

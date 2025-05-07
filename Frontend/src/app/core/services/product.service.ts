@@ -8,7 +8,7 @@ import { environment } from '@env';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  private apiUrl = environment.apiUrl + '/products';
+  private apiUrl = environment.apiUrl + '/product';
 
   constructor(private http: HttpClient) {}
 
@@ -26,7 +26,10 @@ export class ProductService {
 
   createProduct(product: ProductRequest): Observable<ProductResponse> {
     return this.http.post<ProductResponse>(this.apiUrl, product).pipe(
-      catchError(error => throwError(() => error))
+      catchError(err => {
+        console.error('Errore durante la creazione del prodotto:', err);
+        return throwError(() => err);
+      })
     );
   }
 

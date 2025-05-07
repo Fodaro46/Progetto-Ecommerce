@@ -1,1 +1,23 @@
-<p>product-list works!</p>
+<div *ngIf="loading">Caricamento prodotti...</div>
+<div *ngIf="error">{{ error }}</div>
+
+<div *ngIf="!loading && !error" class="product-list">
+  <h2>Elenco Prodotti</h2>
+  <div *ngFor="let product of products" class="product-item">
+    <div class="product-info">
+      <img [src]="product.imageUrl" alt="{{ product.name }}" class="product-image" />
+      <div class="product-details">
+        <h3 (click)="viewProductDetails(product.id)" class="product-name">{{ product.name }}</h3>
+        <p class="product-description">{{ product.description }}</p>
+        <p><strong>Prezzo:</strong> {{ product.price | currency }}</p>
+        <p><strong>Disponibilità:</strong> {{ product.inStock ? 'Disponibile' : 'Non disponibile' }}</p>
+        <button
+          (click)="addToCart(product)"
+          [disabled]="!product.inStock"
+          class="add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

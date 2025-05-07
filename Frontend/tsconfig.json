@@ -20,7 +20,9 @@
       "@models/*": ["app/shared/models/*"],
       "@services/*": ["app/core/services/*"],
       "@shared/*": ["app/shared/*"],
-      "@env": ["app/environments/environment"]
+      "@env": ["app/environments/environment"],
+      "@admin/*": ["src/app/protected/admin-layout/*"],
+      "@app/*": ["app/*"]
     }
   },
   "angularCompilerOptions": {

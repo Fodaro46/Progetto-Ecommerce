@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { KeycloakService } from '@services/keycloak.service'; // assicurati che il path sia corretto
+import { RouterModule, Router } from '@angular/router';
+import { KeycloakService } from '@services/keycloak.service';
+import {map, Observable} from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -10,8 +11,18 @@ import { KeycloakService } from '@services/keycloak.service'; // assicurati che 
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
-export class NavbarComponent {
-  constructor(private keycloakService: KeycloakService) {}
+export class NavbarComponent implements OnInit {
+  public isAuthenticated$: Observable<boolean>;
+  public isAdmin$: Observable<boolean>;
+
+  constructor(private keycloakService: KeycloakService, private router: Router) {
+    this.isAuthenticated$ = this.keycloakService.isAuthenticated$;
+    this.isAdmin$ = this.keycloakService.isAuthenticated$.pipe(
+      map(authenticated => authenticated && this.keycloakService.hasRealmRole('admin'))
+    );
+  }
+
+  ngOnInit(): void {}
 
   login(): void {
     this.keycloakService.login();
@@ -19,5 +30,15 @@ export class NavbarComponent {
 
   register(): void {
     this.keycloakService.register();
+  }
+
+  logout(): void {
+    this.keycloakService.logout().then(() => {
+      this.router.navigate(['/']);
+    });
+  }
+
+  navigateToAdmin(): void {
+    this.router.navigate(['/admin']);
   }
 }

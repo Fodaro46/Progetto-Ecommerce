@@ -1,7 +1,8 @@
 <div class="cart-container" *ngIf="cart">
   <h2>Il tuo carrello</h2>
 
-  <div *ngIf="cart.items.length > 0; else emptyCart">
+  <!-- Controllo esplicito se cart.items è definito e ha una lunghezza > 0 -->
+  <div *ngIf="cart.items && cart.items.length > 0; else emptyCart">
     <div class="cart-item" *ngFor="let item of cart.items">
       <div class="item-info">
         <p><strong>{{ item.productName }}</strong></p>
@@ -27,7 +28,7 @@
 
     <div class="cart-actions">
       <button (click)="clearCart()">Svuota carrello</button>
-      <button (click)="proceedToCheckout()">Procedi al checkout</button>
+      <button (click)="proceedToCheckout()" [disabled]="!cart.items.length">Procedi al checkout...</button>
     </div>
   </div>
 
