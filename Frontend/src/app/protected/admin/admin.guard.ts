@@ -8,23 +8,31 @@ import { switchMap } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class AdminGuard implements CanActivate {
-  constructor(private keycloakService: KeycloakService, private router: Router) {}
+  constructor(
+    private keycloakService: KeycloakService,
+    private router: Router
+  ) {}
 
   canActivate(): Observable<boolean> {
     return this.keycloakService.isAuthenticated$.pipe(
       switchMap(isAuthenticated => {
-        if (isAuthenticated) {
-          const hasAdminRole =
-            this.keycloakService.hasRealmRole('vercarix-rest-apiclient_admin') ||
-            this.keycloakService.hasRealmRole('admin');
-          if (hasAdminRole) {
-            return of(true);
-          } else {
-            this.router.navigate(['/home']);
-            return of(false);
-          }
-        } else {
+        // 1. Controllo autenticazione base
+        if (!isAuthenticated) {
           this.router.navigate(['/login']);
+          return of(false);
+        }
+
+        // 2. Verifica ruolo SPECIFICO per il client
+        const hasAdminRole = this.keycloakService.hasResourceRole(
+          'client_admin', // Ruolo richiesto
+          'vercarix-rest-api' // Client ID esatto
+        );
+
+        // 3. Gestione autorizzazione
+        if (hasAdminRole) {
+          return of(true);
+        } else {
+          this.router.navigate(['/home']);
           return of(false);
         }
       })

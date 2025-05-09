@@ -18,8 +18,7 @@ export class ProductCreateComponent implements OnInit {
   isSubmitting = false;
   errorMessage = '';
   formSubmitted = false;
-  // Proprietà per indicare che la creazione è andata a buon fine (per il feedback visivo)
-  productCreated = false;
+  successMessage = '';  // Sostituisce l'alert con messaggio nel template
 
   constructor(
     private fb: FormBuilder,
@@ -32,36 +31,33 @@ export class ProductCreateComponent implements OnInit {
       description: [''],
       price: [null, [Validators.required, Validators.min(0.01)]],
       stockQuantity: [null, [Validators.required, Validators.min(0)]],
-      imageUrl: ['']
+      imageUrl: ['', [Validators.pattern(/^(http|https):\/\/[^ "]+$/)]]
     });
   }
 
-  ngOnInit(): void {
-    console.log('ProductCreateComponent inizializzato');
-  }
+  ngOnInit(): void {}
 
-  // Restituisce true se il controllo ha errori e se è stato toccato o se il form è stato inviato
   hasError(controlName: string): boolean {
     const control = this.productForm.get(controlName);
     return !!(control && control.invalid && (control.touched || this.formSubmitted));
   }
 
-  // Ritorna il messaggio d'errore in base alle validazioni impostate
   getErrorMessage(controlName: string): string {
     const control = this.productForm.get(controlName);
     if (!control || !control.errors) return '';
 
     if (control.errors['required']) return 'Campo obbligatorio';
     if (control.errors['min']) {
-      if (controlName === 'price') return `Il prezzo deve essere almeno ${control.errors['min'].min}`;
-      if (controlName === 'stockQuantity') return `La quantità deve essere almeno ${control.errors['min'].min}`;
+      return `Il valore minimo consentito è ${control.errors['min'].min}`;
     }
+    if (control.errors['pattern']) return 'URL non valido';
     return 'Campo non valido';
   }
 
   onSubmit(): void {
     this.formSubmitted = true;
     this.errorMessage = '';
+    this.successMessage = '';
     this.productForm.markAllAsTouched();
 
     if (this.productForm.valid) {
@@ -76,22 +72,22 @@ export class ProductCreateComponent implements OnInit {
       this.productService.createProduct(product).subscribe({
         next: (response) => {
           console.log('Prodotto creato con successo', response);
-          // Imposta la flag di successo
-          this.productCreated = true;
-          alert('Prodotto creato!');
-          // Rimanda la navigazione dopo un breve ritardo per dare tempo all'utente di vedere il feedback
+          this.successMessage = 'Prodotto creato con successo!';
+          this.productForm.reset();
+          Object.keys(this.productForm.controls).forEach(key => {
+            this.productForm.get(key)?.setErrors(null);
+          });
+
           setTimeout(() => {
             this.router.navigate(['/admin']);
+            this.isSubmitting = false;
           }, 1500);
         },
         error: (err) => {
           this.isSubmitting = false;
           this.errorMessage = err.error?.message ||
-            `Errore nella creazione del prodotto: ${err.statusText || 'Errore sconosciuto'}`;
+            `Errore nella creazione (${err.status}): ${err.statusText || 'Errore sconosciuto'}`;
           console.error('Errore dettagliato:', err);
-        },
-        complete: () => {
-          this.isSubmitting = false;
         }
       });
     } else {

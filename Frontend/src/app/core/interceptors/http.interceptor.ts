@@ -5,30 +5,39 @@ import { from, switchMap } from 'rxjs';
 
 export const httpInterceptor: HttpInterceptorFn = (req, next) => {
   const keycloakService = inject(KeycloakService);
-  let token = keycloakService.token;
+  const token = keycloakService.token;
 
   if (!token || keycloakService.isTokenExpired()) {
-    // Token assente o scaduto → lo rigenero
-    console.log('[Interceptor] Allego token:', token);
+    console.log('[Interceptor] Token assente o scaduto, tentativo di refresh...');
+
     return from(keycloakService.refreshToken()).pipe(
       switchMap(() => {
         const refreshedToken = keycloakService.token;
+
+        if (!refreshedToken) {
+          console.warn('[Interceptor] Nessun token disponibile dopo il refresh, invio richiesta senza header Authorization.');
+          return next(req); // Invia comunque la richiesta se il refresh fallisce
+        }
+
         const authReq = req.clone({
           setHeaders: {
-            Authorization: "Bearer ${refreshedToken}"
+            Authorization: `Bearer ${refreshedToken}`
           }
         });
+
+        console.log('[Interceptor] Allegato token aggiornato:', refreshedToken);
         return next(authReq);
       })
     );
   }
 
-  // Token valido → lo allego subito
+  // Token valido → lo allego direttamente
   const authReq = req.clone({
     setHeaders: {
-      Authorization: "Bearer ${token}"
+      Authorization: `Bearer ${token}`
     }
   });
-  console.log('[Interceptor] Allego token:', token);
+
+  console.log('[Interceptor] Allegato token valido:', token);
   return next(authReq);
 };
