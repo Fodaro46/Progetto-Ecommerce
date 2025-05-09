@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
+import { environment } from '@env';
 import { CartRequest } from '@models/cart-request.model';
 import { CartResponse } from '@models/cart-response.model';
 import { CartItemResponse } from '@models/cart-item-response.model';

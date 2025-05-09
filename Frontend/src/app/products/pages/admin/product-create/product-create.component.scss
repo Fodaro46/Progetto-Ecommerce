@@ -28,7 +28,8 @@
         color: #333;
       }
 
-      input, textarea {
+      input,
+      textarea {
         padding: 0.7rem;
         border: 1px solid #ddd;
         border-radius: 4px;
@@ -89,7 +90,7 @@
         min-width: 150px;
         padding: 0.8rem 1.5rem;
         background-color: #000;
-        color: white;
+        color: #fff;
         border: none;
         border-radius: 4px;
         font-weight: 500;
@@ -124,7 +125,7 @@
             width: 1rem;
             height: 1rem;
             border: 2px solid rgba(255, 255, 255, 0.5);
-            border-top-color: white;
+            border-top-color: #fff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
           }

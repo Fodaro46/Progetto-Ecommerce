@@ -8,25 +8,25 @@ import { environment } from '@env';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  private apiUrl = environment.apiUrl + '/product';
+  private baseUrl = 'http://localhost:8083/api/product';
 
   constructor(private http: HttpClient) {}
 
   getAllProducts(): Observable<ProductResponse[]> {
-    return this.http.get<ProductResponse[]>(this.apiUrl).pipe(
-      catchError(error => throwError(() => error))
+    return this.http.get<ProductResponse[]>(this.baseUrl, { withCredentials: true }).pipe(
+      catchError((error) => throwError(() => error))
     );
   }
 
   getProductById(id: number): Observable<ProductResponse> {
-    return this.http.get<ProductResponse>(`${this.apiUrl}/${id}`).pipe(
-      catchError(error => throwError(() => error))
+    return this.http.get<ProductResponse>(`${this.baseUrl}/${id}`, { withCredentials: true }).pipe(
+      catchError((error) => throwError(() => error))
     );
   }
 
   createProduct(product: ProductRequest): Observable<ProductResponse> {
-    return this.http.post<ProductResponse>(this.apiUrl, product).pipe(
-      catchError(err => {
+    return this.http.post<ProductResponse>(this.baseUrl, product, { withCredentials: true }).pipe(
+      catchError((err) => {
         console.error('Errore durante la creazione del prodotto:', err);
         return throwError(() => err);
       })
@@ -34,14 +34,14 @@ export class ProductService {
   }
 
   updateProduct(id: number, product: ProductRequest): Observable<ProductResponse> {
-    return this.http.put<ProductResponse>(`${this.apiUrl}/${id}`, product).pipe(
-      catchError(error => throwError(() => error))
+    return this.http.put<ProductResponse>(`${this.baseUrl}/${id}`, product, { withCredentials: true }).pipe(
+      catchError((error) => throwError(() => error))
     );
   }
 
   deleteProduct(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      catchError(error => throwError(() => error))
+    return this.http.delete<void>(`${this.baseUrl}/${id}`, { withCredentials: true }).pipe(
+      catchError((error) => throwError(() => error))
     );
   }
 }

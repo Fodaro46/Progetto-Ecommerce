@@ -3,6 +3,7 @@ package com.esempio.Ecommerce.api.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Builder;
 
 @Builder
@@ -19,5 +20,9 @@ public record ProductRequest(
         String imageUrl,
 
         @NotNull(message = "Category is required")
-        String category
+        String category,
+
+        @NotNull(message = "Stock quantity is required")
+        @PositiveOrZero(message = "Stock quantity must be zero or positive")
+        Integer stockQuantity
 ) {}

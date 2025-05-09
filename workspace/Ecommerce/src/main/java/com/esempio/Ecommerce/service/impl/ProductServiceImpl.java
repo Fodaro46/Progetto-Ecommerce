@@ -50,6 +50,7 @@ public class ProductServiceImpl implements ProductService {
         // Creazione del prodotto
         Product product = new Product();
         product.setName(productRequest.name());
+        product.setCategory(productRequest.category()); // ✅ AGGIUNGI QUESTA RIGA
         product.setShortDescription(productRequest.description());
         product.setLongDescription(productRequest.description());
         product.setPrice(productRequest.price());
@@ -60,7 +61,7 @@ public class ProductServiceImpl implements ProductService {
         // Creazione dell'inventario associato
         Inventory inventory = new Inventory();
         inventory.setProduct(savedProduct);
-        inventory.setQuantity(0);
+        inventory.setQuantity(productRequest.stockQuantity());
         inventoryRepository.save(inventory);
 
         // Associazione dell'inventario al prodotto

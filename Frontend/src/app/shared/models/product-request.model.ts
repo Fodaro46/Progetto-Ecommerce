@@ -4,4 +4,5 @@ export interface ProductRequest {
   price: number;
   imageUrl?: string;
   category: string;
+  stockQuantity: number;
 }

@@ -8,20 +8,27 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
   let token = keycloakService.token;
 
   if (!token || keycloakService.isTokenExpired()) {
-    return from(keycloakService.refreshToken()).pipe( // Converti Promise in Observable
+    // Token assente o scaduto → lo rigenero
+    console.log('[Interceptor] Allego token:', token);
+    return from(keycloakService.refreshToken()).pipe(
       switchMap(() => {
         const refreshedToken = keycloakService.token;
         const authReq = req.clone({
-          setHeaders: { Authorization: `Bearer ${refreshedToken}` },
+          setHeaders: {
+            Authorization: "Bearer ${refreshedToken}"
+          }
         });
         return next(authReq);
       })
     );
   }
 
+  // Token valido → lo allego subito
   const authReq = req.clone({
-    setHeaders: { Authorization: `Bearer ${token}` },
+    setHeaders: {
+      Authorization: "Bearer ${token}"
+    }
   });
-
+  console.log('[Interceptor] Allego token:', token);
   return next(authReq);
 };
