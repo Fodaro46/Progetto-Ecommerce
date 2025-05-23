@@ -20,6 +20,10 @@ export const routes: Routes = [
     loadComponent: () => import('./products/pages/product-detail/product-detail.component').then(m => m.ProductDetailComponent),
   },
   {
+    path: 'checkout',
+    loadComponent: () => import('./checkout/checkout.component').then(m => m.CheckoutComponent)
+  },
+  {
     path: 'admin',
     children: protectedRoutes,
   },

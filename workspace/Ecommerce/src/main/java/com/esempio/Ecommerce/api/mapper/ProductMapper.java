@@ -17,8 +17,8 @@ public interface ProductMapper {
     @Mapping(target = "name", source = "name")
     @Mapping(target = "description", source = "longDescription")
     @Mapping(target = "price", source = "price")
-    @Mapping(target = "imageUrl", ignore = true)
-    @Mapping(target = "category", source = "category") // 🔹 Aggiunta la mappatura per category
+    @Mapping(target = "imageUrl", source = "imageUrl")
+    @Mapping(target = "category", source = "category")
     @Mapping(target = "inStock", expression = "java(product.getInventory() != null && product.getInventory().getQuantity() > 0)")
     @Mapping(target = "availableQuantity", expression = "java(getAvailableQuantity(product))")
     @Mapping(target = "createdAt", source = "createdAt")
@@ -27,33 +27,36 @@ public interface ProductMapper {
 
     List<ProductResponse> toDtoList(List<Product> products);
 
+    @Mapping(target = "imageUrl", source = "imageUrl")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "name", source = "name")
     @Mapping(target = "shortDescription", expression = "java(createShortDescription(productRequest))")
     @Mapping(target = "longDescription", source = "description")
     @Mapping(target = "price", source = "price")
-    @Mapping(target = "category", source = "category") // 🔹 Aggiunta la mappatura per category
+    @Mapping(target = "category", source = "category")
     @Mapping(target = "inventory", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Product toEntity(ProductRequest productRequest);
 
+    @Mapping(target = "imageUrl", source = "imageUrl")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "name", source = "name")
     @Mapping(target = "shortDescription", expression = "java(createShortDescription(productRequest))")
     @Mapping(target = "longDescription", source = "description")
     @Mapping(target = "price", source = "price")
-    @Mapping(target = "category", source = "category") // 🔹 Aggiunta la mappatura per category
+    @Mapping(target = "category", source = "category")
     @Mapping(target = "inventory", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateProduct(ProductRequest productRequest, @MappingTarget Product product);
 
     default String createShortDescription(ProductRequest productRequest) {
-        if (productRequest.description() == null || productRequest.description().length() <= 100) {
-            return productRequest.description();
+        String desc = productRequest.description();
+        if (desc == null || desc.length() <= 100) {
+            return desc;
         }
-        return productRequest.description().substring(0, 97) + "...";
+        return desc.substring(0, 97) + "...";
     }
 
     default Integer getAvailableQuantity(Product product) {

@@ -22,7 +22,15 @@ export class CartComponent implements OnInit {
   private router = inject(Router);
 
   ngOnInit(): void {
-    this.loadCart();
+    const userId = this.keycloakService.profile?.id;
+    if (!userId) {
+      console.warn('No user ID available');
+      return;
+    }
+    this.cartService.mergeLocalCart(userId).subscribe({
+      next: cart => this.cart = cart,
+      error: err => console.error('Merge error', err)
+    });
   }
 
   loadCart(): void {

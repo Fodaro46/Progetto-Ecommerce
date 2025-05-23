@@ -2,11 +2,11 @@ package com.esempio.Ecommerce.api.controller.product;
 
 import com.esempio.Ecommerce.api.dto.request.ProductRequest;
 import com.esempio.Ecommerce.api.dto.response.ProductResponse;
-import com.esempio.Ecommerce.domain.entity.Product;
 import com.esempio.Ecommerce.service.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 import jakarta.validation.Valid;
 import java.util.List;
 
@@ -20,19 +20,29 @@ public class ProductController {
         this.productService = productService;
     }
 
+    /** Lista tutti i prodotti come DTO */
     @GetMapping
-    public List<Product> getProducts() {
+    public List<ProductResponse> getProducts() {
         return productService.getProducts();
     }
 
-    // Endpoint per ottenere un singolo prodotto per ID
+    /** Ottieni un singolo prodotto */
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
-        ProductResponse response = productService.getProductById(id);
-        return ResponseEntity.ok(response);
+        ProductResponse dto = productService.getProductById(id);
+        return ResponseEntity.ok(dto);
     }
 
-    // Endpoint per eliminare un prodotto (solo admin)
+    /** Crea un nuovo prodotto (solo admin) */
+    @PostMapping
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<ProductResponse> addProduct(
+            @Valid @RequestBody ProductRequest request) {
+        ProductResponse dto = productService.addProduct(request);
+        return ResponseEntity.ok(dto);
+    }
+
+    /** Elimina un prodotto (solo admin) */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('admin')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
@@ -40,7 +50,7 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    // Endpoint per aggiornare la quantità del prodotto
+    /** Aggiorna la quantità in magazzino */
     @PutMapping("/{productId}/quantity")
     public ResponseEntity<Void> updateProductQuantity(
             @PathVariable Long productId,
@@ -49,21 +59,16 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
-    // Endpoint per la ricerca/filtro dei prodotti
+    /** Ricerca / filtro prodotti */
     @GetMapping("/search")
     public ResponseEntity<List<ProductResponse>> searchProducts(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice) {
-        List<ProductResponse> results = productService.searchProducts(name, category, minPrice, maxPrice);
-        return ResponseEntity.ok(results);
-    }
 
-    @PostMapping
-    @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<ProductResponse> addProduct(@Valid @RequestBody ProductRequest productRequest) {
-        ProductResponse newProduct = productService.addProduct(productRequest);
-        return ResponseEntity.ok(newProduct);
+        List<ProductResponse> results =
+                productService.searchProducts(name, category, minPrice, maxPrice);
+        return ResponseEntity.ok(results);
     }
 }

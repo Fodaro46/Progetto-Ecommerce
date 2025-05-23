@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { KeycloakService } from '@services/keycloak.service';
-import {map, Observable} from 'rxjs';
+import { CartService } from '@services/cart.service';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
@@ -12,33 +14,26 @@ import {map, Observable} from 'rxjs';
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent implements OnInit {
-  public isAuthenticated$: Observable<boolean>;
-  public isAdmin$: Observable<boolean>;
+  isAuthenticated$: Observable<boolean>;
+  isAdmin$: Observable<boolean>;
+  cartCount$: Observable<number>;
 
-  constructor(private keycloakService: KeycloakService, private router: Router) {
-    this.isAuthenticated$ = this.keycloakService.isAuthenticated$;
-    this.isAdmin$ = this.keycloakService.isAuthenticated$.pipe(
-      map(authenticated => authenticated && this.keycloakService.hasRealmRole('admin'))
+  constructor(
+    private keycloak: KeycloakService,
+    private cartService: CartService,
+    private router: Router
+  ) {
+    this.isAuthenticated$ = this.keycloak.isAuthenticated$;
+    this.isAdmin$ = this.isAuthenticated$.pipe(
+      map(auth => auth && this.keycloak.hasRealmRole('admin'))
     );
+    this.cartCount$ = this.cartService.cartCount$;
   }
 
   ngOnInit(): void {}
 
-  login(): void {
-    this.keycloakService.login();
-  }
-
-  register(): void {
-    this.keycloakService.register();
-  }
-
-  logout(): void {
-    this.keycloakService.logout().then(() => {
-      this.router.navigate(['/']);
-    });
-  }
-
-  navigateToAdmin(): void {
-    this.router.navigate(['/admin']);
-  }
+  login(): void { this.keycloak.login(); }
+  register(): void { this.keycloak.register(); }
+  logout(): void { this.keycloak.logout().then(() => this.router.navigate(['/'])); }
+  goAdmin(): void { this.router.navigate(['/admin']); }
 }

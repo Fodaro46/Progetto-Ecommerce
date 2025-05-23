@@ -35,6 +35,9 @@ public class Product {
     @Column(name = "price", nullable = false)
     private Double price;
 
+    @Column(name = "image_url", length = 255, nullable = true)
+    private String imageUrl;
+
     @OneToOne(mappedBy = "product", cascade = CascadeType.REMOVE, optional = false, orphanRemoval = true)
     @JsonManagedReference
     private Inventory inventory;

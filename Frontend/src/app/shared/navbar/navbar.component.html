@@ -1,20 +1,17 @@
 <nav class="navbar">
-  <div class="logo">V3rc1</div>
+  <div class="logo" routerLink="/home">V3rc1</div>
   <ul class="nav-links">
     <li><a routerLink="/products">Prodotti</a></li>
-
-    <li *ngIf="isAuthenticated$ | async">
-      <a routerLink="/orders">I tuoi ordini</a>
-    </li>
-
-    <li *ngIf="isAdmin$ | async">
-      <button (click)="navigateToAdmin()">Admin</button>
-    </li>
-
-    <div class="actions">
-      <button *ngIf="!(isAuthenticated$ | async)" (click)="login()">Accedi</button>
-      <button *ngIf="!(isAuthenticated$ | async)" (click)="register()">Registrati</button>
-      <button *ngIf="isAuthenticated$ | async" (click)="logout()">Logout</button>
-    </div>
+    <li *ngIf="isAuthenticated$ | async"><a routerLink="/orders">I tuoi ordini</a></li>
+    <li *ngIf="isAdmin$ | async"><button (click)="goAdmin()">Admin</button></li>
   </ul>
+  <div class="actions">
+    <a routerLink="/cart" class="cart-icon">
+      <i class="icon-cart"></i>
+      <span class="badge" *ngIf="(cartCount$ | async) as c">{{ c }}</span>
+    </a>
+    <button *ngIf="!(isAuthenticated$ | async)" (click)="login()">Accedi</button>
+    <button *ngIf="!(isAuthenticated$ | async)" (click)="register()">Registrati</button>
+    <button *ngIf="isAuthenticated$ | async" (click)="logout()">Logout</button>
+  </div>
 </nav>

@@ -1,23 +1,25 @@
-<div *ngIf="loading">Caricamento prodotti...</div>
-<div *ngIf="error">{{ error }}</div>
+<app-navbar></app-navbar>
+<section class="product-list-section">
+  <h2 class="section-title">Elenco Prodotti</h2>
+  <div *ngIf="loading" class="loader">Caricamento prodotti...</div>
+  <div *ngIf="error" class="error-msg">{{ error }}</div>
 
-<div *ngIf="!loading && !error" class="product-list">
-  <h2>Elenco Prodotti</h2>
-  <div *ngFor="let product of products" class="product-item">
-    <div class="product-info">
-      <img [src]="product.imageUrl" alt="{{ product.name }}" class="product-image" />
-      <div class="product-details">
-        <h3 (click)="viewProductDetails(product.id)" class="product-name">{{ product.name }}</h3>
-        <p class="product-description">{{ product.description }}</p>
-        <p><strong>Prezzo:</strong> {{ product.price | currency }}</p>
-        <p><strong>Disponibilità:</strong> {{ product.inStock ? 'Disponibile' : 'Non disponibile' }}</p>
-        <button
-          (click)="addToCart(product)"
-          [disabled]="!product.inStock"
-          class="add-to-cart-btn">
-          Aggiungi al carrello
-        </button>
+  <div class="grid-container" *ngIf="!loading && !error">
+    <div *ngFor="let p of products" class="card">
+      <div class="card-img">
+        <img [src]="p.imageUrl" alt="{{ p.name }}" (error)="onImageError(p)" />
+      </div>
+      <div class="card-body">
+        <h3 class="card-title" (click)="viewProductDetails(p.id)">{{ p.name }}</h3>
+        <p class="card-desc">{{ p.description }}</p>
+        <div class="card-footer">
+          <span class="price">{{ p.price | currency:'EUR':'symbol' }}</span>
+          <button (click)="addToCart(p)" [disabled]="!p.inStock" class="btn-add">
+            <span *ngIf="p.inStock">Aggiungi</span>
+            <span *ngIf="!p.inStock">Esaurito</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
+</section>
