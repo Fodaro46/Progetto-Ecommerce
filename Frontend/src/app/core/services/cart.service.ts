@@ -1,7 +1,8 @@
+/* Updated CartService: add tracking of currentCart */
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { CartResponse } from '@models/cart-response.model';
 import { CartItemResponse } from '@models/cart-item-response.model';
 
@@ -9,6 +10,15 @@ import { CartItemResponse } from '@models/cart-item-response.model';
 export class CartService {
   private readonly BASE_URL = '/api/cart';
   private LOCAL_CART_KEY = 'local_cart';
+
+  // BehaviorSubject to hold the current cart
+  private currentCartSubject = new BehaviorSubject<CartResponse | null>(null);
+  /** Latest cart object (or null if none) */
+  public get currentCart(): CartResponse | null {
+    return this.currentCartSubject.value;
+  }
+  /** Observable stream of cart changes */
+  public currentCart$ = this.currentCartSubject.asObservable();
 
   // BehaviorSubject to track number of items in cart
   private cartCountSubject = new BehaviorSubject<number>(0);
@@ -20,18 +30,22 @@ export class CartService {
 
   /** Fetch the cart for a given userId */
   getCart(userId: string): Observable<CartResponse> {
-    return this.http.get<CartResponse>(`${this.BASE_URL}/${userId}`)
-      .pipe(
-        tap(cart => this.updateCartCount(cart.totalItems))
-      );
+    return this.http.get<CartResponse>(`${this.BASE_URL}/${userId}`).pipe(
+      tap(cart => {
+        this.currentCartSubject.next(cart);
+        this.updateCartCount(cart.totalItems);
+      })
+    );
   }
 
   /** Create a new cart for a user */
   createCart(userId: string): Observable<CartResponse> {
-    return this.http.post<CartResponse>(`${this.BASE_URL}`, { userId })
-      .pipe(
-        tap(cart => this.updateCartCount(cart.totalItems))
-      );
+    return this.http.post<CartResponse>(`${this.BASE_URL}`, { userId }).pipe(
+      tap(cart => {
+        this.currentCartSubject.next(cart);
+        this.updateCartCount(cart.totalItems);
+      })
+    );
   }
 
   /** Add an item to cart by cartId */
@@ -56,18 +70,16 @@ export class CartService {
 
   /** Remove a single item from the cart */
   removeCartItem(itemId: number, cartId: number): Observable<void> {
-    return this.http.delete<void>(`${this.BASE_URL}/${cartId}/items/${itemId}`)
-      .pipe(
-        tap(() => this.refreshCartCount(cartId))
-      );
+    return this.http.delete<void>(`${this.BASE_URL}/${cartId}/items/${itemId}`).pipe(
+      tap(() => this.refreshCartCount(cartId))
+    );
   }
 
   /** Clear all items in the cart */
   clearCart(cartId: number): Observable<void> {
-    return this.http.delete<void>(`${this.BASE_URL}/${cartId}/items`)
-      .pipe(
-        tap(() => this.updateCartCount(0))
-      );
+    return this.http.delete<void>(`${this.BASE_URL}/${cartId}/items`).pipe(
+      tap(() => this.refreshCartCount(cartId))
+    );
   }
 
   /** Merge localStorage cart into backend cart for user */
@@ -82,6 +94,7 @@ export class CartService {
     ).pipe(
       tap(cart => {
         this.clearLocalCart();
+        this.currentCartSubject.next(cart);
         this.updateCartCount(cart.totalItems);
       })
     );
@@ -90,7 +103,10 @@ export class CartService {
   /** Helper to refresh count by refetching cart */
   private refreshCartCount(cartId: number): void {
     this.http.get<CartResponse>(`${this.BASE_URL}/by-cart-id/${cartId}`)
-      .subscribe(cart => this.updateCartCount(cart.totalItems));
+      .subscribe(cart => {
+        this.currentCartSubject.next(cart);
+        this.updateCartCount(cart.totalItems);
+      });
   }
 
   /** LocalStorage methods for guest users **/
