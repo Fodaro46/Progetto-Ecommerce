@@ -8,10 +8,11 @@
   <div class="actions">
     <a routerLink="/cart" class="cart-icon">
       <i class="icon-cart"></i>
-      <span class="badge" *ngIf="(cartCount$ | async) as c">{{ c }}</span>
+      <span class="badge" *ngIf="count$ | async as c">{{ c }}</span>
     </a>
     <button *ngIf="!(isAuthenticated$ | async)" (click)="login()">Accedi</button>
     <button *ngIf="!(isAuthenticated$ | async)" (click)="register()">Registrati</button>
     <button *ngIf="isAuthenticated$ | async" (click)="logout()">Logout</button>
   </div>
 </nav>
+

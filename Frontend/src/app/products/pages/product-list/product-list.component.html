@@ -12,17 +12,24 @@
           [src]="p.imageUrl"
           alt="{{ p.name }}"
           loading="lazy"
-          (error)="onImageError(p)" />
+          (error)="onImageError(p)"
+        />
       </div>
       <div class="card-body">
-        <h3 class="card-title" (click)="viewProductDetails(p.id)">{{ p.name }}</h3>
+        <h3
+          class="card-title"
+          (click)="viewProductDetails(p.id)"
+        >
+          {{ p.name }}
+        </h3>
         <p class="card-desc">{{ p.description }}</p>
         <div class="card-footer">
           <span class="price">{{ p.price | currency:'EUR':'symbol' }}</span>
           <button
             (click)="addToCart(p)"
             [disabled]="!p.inStock"
-            class="btn-add">
+            class="btn-add"
+          >
             <span *ngIf="p.inStock">Aggiungi</span>
             <span *ngIf="!p.inStock">Esaurito</span>
           </button>

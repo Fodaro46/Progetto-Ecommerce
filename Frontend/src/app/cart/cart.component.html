@@ -1,38 +1,53 @@
-<div class="cart-container" *ngIf="cart">
-  <h2>Il tuo carrello</h2>
+<ng-container *ngIf="cart as c; else noCart">
+  <div class="cart-container">
+    <h2>Il tuo carrello</h2>
 
-  <!-- Controllo esplicito se cart.items è definito e ha una lunghezza > 0 -->
-  <div *ngIf="cart.items && cart.items.length > 0; else emptyCart">
-    <div class="cart-item" *ngFor="let item of cart.items">
-      <div class="item-info">
-        <p><strong>{{ item.productName }}</strong></p>
-        <img [src]="item.productImageUrl" alt="{{ item.productName }}" width="80" height="80" style="object-fit: cover; border-radius: 0.5rem;" />
-        <p>Prezzo unitario: €{{ item.unitPrice }}</p>
-        <p>Quantità:
-          <input
-            type="number"
-            [value]="item.quantity"
-            min="1"
-            #qtyInput
-            (change)="updateQuantity(item, qtyInput.valueAsNumber)" />
-        </p>
-        <p>Totale: €{{ item.totalPrice }}</p>
+    <ng-container *ngIf="c.items.length > 0; else emptyCart">
+      <div class="cart-item" *ngFor="let item of c.items">
+        <div class="item-info">
+          <p><strong>{{ item.productName }}</strong></p>
+          <img
+            [src]="item.productImageUrl"
+            alt="{{ item.productName }}"
+            width="80"
+            height="80"
+            style="object-fit: cover; border-radius: 0.5rem;"
+          />
+          <p>Prezzo unitario: €{{ item.unitPrice }}</p>
+          <p>
+            Quantità:
+            <input
+              type="number"
+              [value]="item.quantity"
+              min="1"
+              #qtyInput
+              (change)="updateQuantity(item, qtyInput.valueAsNumber)"
+            />
+          </p>
+          <p>Totale: €{{ item.totalPrice }}</p>
+        </div>
+        <button (click)="removeItem(item)">Rimuovi</button>
       </div>
-      <button (click)="removeItem(item)">Rimuovi</button>
-    </div>
 
-    <div class="cart-summary">
-      <p><strong>Totale prodotti:</strong> {{ cart.totalItems }}</p>
-      <p><strong>Prezzo totale:</strong> €{{ cart.totalPrice }}</p>
-    </div>
+      <div class="cart-summary">
+        <p><strong>Totale prodotti:</strong> {{ c.totalItems }}</p>
+        <p><strong>Prezzo totale:</strong> €{{ c.totalPrice }}</p>
+      </div>
 
-    <div class="cart-actions">
-      <button (click)="clearCart()">Svuota carrello</button>
-      <button (click)="proceedToCheckout()" [disabled]="!cart.items.length">Procedi al checkout...</button>
-    </div>
+      <div class="cart-actions">
+        <button (click)="clearCart()">Svuota carrello</button>
+        <button (click)="proceedToCheckout()" [disabled]="c.items.length === 0">
+          Procedi al checkout...
+        </button>
+      </div>
+    </ng-container>
+
+    <ng-template #emptyCart>
+      <p>Il tuo carrello è vuoto.</p>
+    </ng-template>
   </div>
+</ng-container>
 
-  <ng-template #emptyCart>
-    <p>Il tuo carrello è vuoto.</p>
-  </ng-template>
-</div>
+<ng-template #noCart>
+  <p>Carrello non disponibile.</p>
+</ng-template>

@@ -1,143 +1,130 @@
-/* Updated CartService: add tracking of currentCart */
+// src/app/services/cart.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
+import { tap, switchMap } from 'rxjs/operators';
+
+import { environment } from '@env';
 import { CartResponse } from '@models/cart-response.model';
 import { CartItemResponse } from '@models/cart-item-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
-  private readonly BASE_URL = '/api/cart';
-  private LOCAL_CART_KEY = 'local_cart';
+  private readonly BASE_URL = `http://localhost:8083/api/cart/active`;
+  private readonly LOCAL_CART_KEY = 'local_cart';
 
-  // BehaviorSubject to hold the current cart
-  private currentCartSubject = new BehaviorSubject<CartResponse | null>(null);
-  /** Latest cart object (or null if none) */
-  public get currentCart(): CartResponse | null {
-    return this.currentCartSubject.value;
-  }
-  /** Observable stream of cart changes */
-  public currentCart$ = this.currentCartSubject.asObservable();
+  private cartSubject = new BehaviorSubject<CartResponse | null>(null);
+  public cart$ = this.cartSubject.asObservable();
 
-  // BehaviorSubject to track number of items in cart
-  private cartCountSubject = new BehaviorSubject<number>(0);
-  cartCount$ = this.cartCountSubject.asObservable();
+  private countSubject = new BehaviorSubject<number>(0);
+  public count$ = this.countSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
-  /** Backend methods **/
-
-  /** Fetch the cart for a given userId */
-  getCart(userId: string): Observable<CartResponse> {
-    return this.http.get<CartResponse>(`${this.BASE_URL}/${userId}`).pipe(
-      tap(cart => {
-        this.currentCartSubject.next(cart);
-        this.updateCartCount(cart.totalItems);
-      })
-    );
+  /** Carica (o crea) il carrello attivo dell’utente loggato */
+  fetchActiveCart(): Observable<CartResponse> {
+    return this.http
+      .get<CartResponse>(`${this.BASE_URL}/active`, { withCredentials: true })
+      .pipe(
+        tap(cart => {
+          this.cartSubject.next(cart);
+          this.countSubject.next(cart.totalItems);
+        })
+      );
   }
 
-  /** Create a new cart for a user */
-  createCart(userId: string): Observable<CartResponse> {
-    return this.http.post<CartResponse>(`${this.BASE_URL}`, { userId }).pipe(
-      tap(cart => {
-        this.currentCartSubject.next(cart);
-        this.updateCartCount(cart.totalItems);
-      })
-    );
+  /** Aggiunge un prodotto al carrello attivo e ritorna il Cart aggiornato */
+  addItem(productId: number, quantity: number): Observable<CartResponse> {
+    return this.http
+      .post<CartResponse>(
+        `${this.BASE_URL}/active`,
+        { productId, quantity },
+        { withCredentials: true }
+      )
+      .pipe(
+        tap(cart => {
+          this.cartSubject.next(cart);
+          this.countSubject.next(cart.totalItems);
+        })
+      );
   }
 
-  /** Add an item to cart by cartId */
-  addItemToCart(cartId: number, productId: number, quantity: number): Observable<CartItemResponse> {
-    return this.http.post<CartItemResponse>(
-      `${this.BASE_URL}/${cartId}/items`,
-      { productId, quantity }
-    ).pipe(
-      tap(() => this.refreshCartCount(cartId))
-    );
+  /**
+   * Aggiorna la quantità di un singolo item e ritorna
+   * il carrello intero (CartResponse) aggiornato
+   */
+  updateItem(itemId: number, quantity: number): Observable<CartResponse> {
+    const params = new HttpParams().set('quantity', quantity.toString());
+    return this.http
+      .put<CartItemResponse>(
+        `${this.BASE_URL}/items/${itemId}`,
+        null,
+        { params, withCredentials: true }
+      )
+      .pipe(
+        switchMap(() => this.fetchActiveCart())
+      );
   }
 
-  /** Update quantity of an existing cart item */
-  updateCartItem(itemId: number, cartId: number, quantity: number): Observable<void> {
-    return this.http.put<void>(
-      `${this.BASE_URL}/${cartId}/items/${itemId}`,
-      { quantity }
-    ).pipe(
-      tap(() => this.refreshCartCount(cartId))
-    );
+  /**
+   * Rimuove un item dal carrello e ritorna
+   * il carrello aggiornato (CartResponse)
+   */
+  removeItem(itemId: number): Observable<CartResponse> {
+    return this.http
+      .delete<void>(`${this.BASE_URL}/items/${itemId}`, { withCredentials: true })
+      .pipe(
+        switchMap(() => this.fetchActiveCart())
+      );
   }
 
-  /** Remove a single item from the cart */
-  removeCartItem(itemId: number, cartId: number): Observable<void> {
-    return this.http.delete<void>(`${this.BASE_URL}/${cartId}/items/${itemId}`).pipe(
-      tap(() => this.refreshCartCount(cartId))
-    );
+  /** Svuota completamente il carrello attivo */
+  clearCart(): Observable<void> {
+    return this.http
+      .delete<void>(`${this.BASE_URL}/active`, { withCredentials: true })
+      .pipe(
+        tap(() => {
+          this.cartSubject.next(null);
+          this.countSubject.next(0);
+        })
+      );
   }
 
-  /** Clear all items in the cart */
-  clearCart(cartId: number): Observable<void> {
-    return this.http.delete<void>(`${this.BASE_URL}/${cartId}/items`).pipe(
-      tap(() => this.refreshCartCount(cartId))
-    );
-  }
+  // ——————————————————————————
+  // GUEST FLOW: localStorage
+  // ——————————————————————————
 
-  /** Merge localStorage cart into backend cart for user */
-  mergeLocalCart(userId: string): Observable<CartResponse> {
-    const localItems = this.getLocalCart();
-    if (localItems.length === 0) {
-      return this.getCart(userId);
-    }
-    return this.http.post<CartResponse>(
-      `${this.BASE_URL}/${userId}/merge`,
-      { items: localItems }
-    ).pipe(
-      tap(cart => {
-        this.clearLocalCart();
-        this.currentCartSubject.next(cart);
-        this.updateCartCount(cart.totalItems);
-      })
-    );
-  }
+  /** Aggiunge o aggiorna un item in localStorage */
+  addToLocal(productId: number, quantity: number): void {
+    const cart: Array<{ productId: number; quantity: number }> =
+      JSON.parse(localStorage.getItem(this.LOCAL_CART_KEY) || '[]');
 
-  /** Helper to refresh count by refetching cart */
-  private refreshCartCount(cartId: number): void {
-    this.http.get<CartResponse>(`${this.BASE_URL}/by-cart-id/${cartId}`)
-      .subscribe(cart => {
-        this.currentCartSubject.next(cart);
-        this.updateCartCount(cart.totalItems);
-      });
-  }
-
-  /** LocalStorage methods for guest users **/
-
-  /** Add or update an item in the local cart */
-  addToLocalCart(item: { productId: number; quantity: number }): void {
-    const cart = this.getLocalCart();
-    const idx = cart.findIndex(i => i.productId === item.productId);
-    if (idx > -1) {
-      cart[idx].quantity += item.quantity;
+    const idx = cart.findIndex(i => i.productId === productId);
+    if (idx >= 0) {
+      cart[idx].quantity += quantity;
     } else {
-      cart.push({ productId: item.productId, quantity: item.quantity });
+      cart.push({ productId, quantity });
     }
+
     localStorage.setItem(this.LOCAL_CART_KEY, JSON.stringify(cart));
-    this.updateCartCount(cart.reduce((sum, i) => sum + i.quantity, 0));
+    this.countSubject.next(cart.reduce((sum, i) => sum + i.quantity, 0));
   }
 
-  /** Retrieve local cart items */
-  getLocalCart(): Array<{ productId: number; quantity: number }> {
-    const json = localStorage.getItem(this.LOCAL_CART_KEY);
-    return json ? JSON.parse(json) : [];
-  }
+  /** Al login, fonde il carrello guest con quello backend */
+  mergeLocalOnLogin(): Observable<CartResponse> {
+    const local: Array<{ productId: number; quantity: number }> =
+      JSON.parse(localStorage.getItem(this.LOCAL_CART_KEY) || '[]');
 
-  /** Clear the local cart */
-  clearLocalCart(): void {
-    localStorage.removeItem(this.LOCAL_CART_KEY);
-    this.updateCartCount(0);
-  }
+    if (local.length === 0) {
+      return this.fetchActiveCart();
+    }
 
-  /** Update the cartCount BehaviorSubject */
-  private updateCartCount(count: number): void {
-    this.cartCountSubject.next(count);
+    const ops = local.map(i => this.addItem(i.productId, i.quantity));
+    return forkJoin(ops).pipe(
+      switchMap(() => {
+        localStorage.removeItem(this.LOCAL_CART_KEY);
+        return this.fetchActiveCart();
+      })
+    );
   }
 }

@@ -1,15 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ProductService } from '@services/product.service';
-import { Router } from '@angular/router';
-import { ProductRequest } from '@models/product-request.model';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ProductService } from '@services/product.service';
+import { ProductRequest } from '@models/product-request.model';
 
 @Component({
   selector: 'app-product-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './product-create.component.html',
   styleUrls: ['./product-create.component.scss']
 })
@@ -17,8 +16,7 @@ export class ProductCreateComponent implements OnInit {
   productForm: FormGroup;
   isSubmitting = false;
   errorMessage = '';
-  formSubmitted = false;
-  successMessage = '';  // Sostituisce l'alert con messaggio nel template
+  successMessage = '';
 
   constructor(
     private fb: FormBuilder,
@@ -26,12 +24,12 @@ export class ProductCreateComponent implements OnInit {
     private router: Router
   ) {
     this.productForm = this.fb.group({
-      name: ['', [Validators.required]],
-      category: ['', [Validators.required]],
+      name: ['', Validators.required],
+      category: ['', Validators.required],
       description: [''],
       price: [null, [Validators.required, Validators.min(0.01)]],
       stockQuantity: [null, [Validators.required, Validators.min(0)]],
-      imageUrl: ['', [Validators.pattern(/^(http|https):\/\/[^ "]+$/)]]
+      imageUrl: ['', Validators.pattern(/^(https?:\/\/[^ "']+)$/)]
     });
   }
 
@@ -42,27 +40,24 @@ export class ProductCreateComponent implements OnInit {
     return !!(control && control.invalid && (control.touched || this.formSubmitted));
   }
 
-  getErrorMessage(controlName: string): string {
-    const control = this.productForm.get(controlName);
-    if (!control || !control.errors) return '';
+  get formSubmitted(): boolean { return this.isSubmitting; }
 
-    if (control.errors['required']) return 'Campo obbligatorio';
-    if (control.errors['min']) {
-      return `Il valore minimo consentito è ${control.errors['min'].min}`;
-    }
-    if (control.errors['pattern']) return 'URL non valido';
+  getErrorMessage(controlName: string): string {
+    const c = this.productForm.get(controlName);
+    if (!c || !c.errors) return '';
+    if (c.errors['required']) return 'Campo obbligatorio';
+    if (c.errors['min']) return `Valore minimo ${c.errors['min'].min}`;
+    if (c.errors['pattern']) return 'URL non valido';
     return 'Campo non valido';
   }
 
   onSubmit(): void {
-    this.formSubmitted = true;
+    this.isSubmitting = true;
     this.errorMessage = '';
     this.successMessage = '';
     this.productForm.markAllAsTouched();
 
     if (this.productForm.valid) {
-      this.isSubmitting = true;
-
       const product: ProductRequest = {
         ...this.productForm.value,
         price: Number(this.productForm.value.price),
@@ -70,28 +65,20 @@ export class ProductCreateComponent implements OnInit {
       };
 
       this.productService.createProduct(product).subscribe({
-        next: (response) => {
-          console.log('Prodotto creato con successo', response);
+        next: () => {
           this.successMessage = 'Prodotto creato con successo!';
           this.productForm.reset();
-          Object.keys(this.productForm.controls).forEach(key => {
-            this.productForm.get(key)?.setErrors(null);
-          });
-
-          setTimeout(() => {
-            this.router.navigate(['/admin']);
-            this.isSubmitting = false;
-          }, 1500);
+          setTimeout(() => this.router.navigate(['/admin']), 1500);
         },
-        error: (err) => {
+        error: (err: any) => {
+          console.error('Errore creazione prodotto', err);
+          this.errorMessage = err.error?.message || 'Errore sconosciuto';
           this.isSubmitting = false;
-          this.errorMessage = err.error?.message ||
-            `Errore nella creazione (${err.status}): ${err.statusText || 'Errore sconosciuto'}`;
-          console.error('Errore dettagliato:', err);
         }
       });
     } else {
-      this.errorMessage = 'Il form contiene errori. Controlla i campi evidenziati.';
+      this.errorMessage = 'Form contiene errori.';
+      this.isSubmitting = false;
     }
   }
 }

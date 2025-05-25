@@ -2,7 +2,6 @@
   <h2>Crea nuovo prodotto</h2>
 
   <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
-    <!-- Messaggio di successo -->
     <div class="success-message" *ngIf="successMessage">
       {{ successMessage }}
     </div>
@@ -12,7 +11,8 @@
       <input
         id="name"
         formControlName="name"
-        [ngClass]="{'invalid': hasError('name')}">
+        [ngClass]="{'invalid': hasError('name')}"
+      />
       <span class="error" *ngIf="hasError('name')">
         {{ getErrorMessage('name') }}
       </span>
@@ -23,7 +23,8 @@
       <input
         id="category"
         formControlName="category"
-        [ngClass]="{'invalid': hasError('category')}">
+        [ngClass]="{'invalid': hasError('category')}"
+      />
       <span class="error" *ngIf="hasError('category')">
         {{ getErrorMessage('category') }}
       </span>
@@ -34,7 +35,8 @@
       <textarea
         id="description"
         formControlName="description"
-        rows="3"></textarea>
+        rows="3"
+      ></textarea>
     </div>
 
     <div class="form-group">
@@ -45,7 +47,8 @@
         formControlName="price"
         step="0.01"
         min="0.01"
-        [ngClass]="{'invalid': hasError('price')}">
+        [ngClass]="{'invalid': hasError('price')}"
+      />
       <span class="error" *ngIf="hasError('price')">
         {{ getErrorMessage('price') }}
       </span>
@@ -58,7 +61,8 @@
         type="number"
         formControlName="stockQuantity"
         min="0"
-        [ngClass]="{'invalid': hasError('stockQuantity')}">
+        [ngClass]="{'invalid': hasError('stockQuantity')}"
+      />
       <span class="error" *ngIf="hasError('stockQuantity')">
         {{ getErrorMessage('stockQuantity') }}
       </span>
@@ -69,7 +73,8 @@
       <input
         id="imageUrl"
         formControlName="imageUrl"
-        [ngClass]="{'invalid': hasError('imageUrl')}">
+        [ngClass]="{'invalid': hasError('imageUrl')}"
+      />
       <span class="error" *ngIf="hasError('imageUrl')">
         {{ getErrorMessage('imageUrl') }}
       </span>
@@ -83,7 +88,8 @@
       <button
         type="submit"
         [disabled]="isSubmitting"
-        [class.submitting]="isSubmitting">
+        [class.submitting]="isSubmitting"
+      >
         <span *ngIf="!isSubmitting">Crea Prodotto</span>
         <span *ngIf="isSubmitting">Creazione in corso...</span>
       </button>

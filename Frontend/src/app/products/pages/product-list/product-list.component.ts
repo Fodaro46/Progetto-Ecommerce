@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { NavbarComponent } from '@shared/navbar/navbar.component';
-
 import { ProductService } from '@services/product.service';
 import { CartService } from '@services/cart.service';
 import { KeycloakService } from '@services/keycloak.service';
@@ -11,11 +10,7 @@ import { ProductResponse } from '@models/product-response.model';
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    NavbarComponent
-  ],
+  imports: [CommonModule, RouterModule, NavbarComponent],
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.scss']
 })
@@ -33,19 +28,15 @@ export class ProductListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadProducts();
-  }
-
-  private loadProducts(): void {
     this.loading = true;
     this.productService.getAllProducts().subscribe({
-      next: (data: ProductResponse[]) => {
+      next: data => {
         this.products = data;
         this.loading = false;
       },
-      error: (err) => {
+      error: err => {
         console.error('Load products error', err);
-        this.error = 'Errore durante il caricamento dei prodotti.';
+        this.error = 'Errore caricamento prodotti.';
         this.loading = false;
       }
     });
@@ -56,33 +47,18 @@ export class ProductListComponent implements OnInit {
   }
 
   async addToCart(product: ProductResponse): Promise<void> {
-    const tokenExpired = await this.keycloakService.isTokenExpired();
     if (!product.inStock) {
       alert('Prodotto non disponibile.');
       return;
     }
+    const tokenExpired = await this.keycloakService.isTokenExpired();
     if (tokenExpired) {
-      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url }});
       return;
     }
-
-    const currentCart = this.cartService.currentCart;
-    if (!currentCart) {
-      const userId = this.keycloakService.profile?.id;
-      if (!userId) return;
-      this.cartService.createCart(userId).subscribe({
-        next: cart => this.addItemToCart(cart.id, product.id, 1),
-        error: err => console.error('Error creating cart', err)
-      });
-    } else {
-      this.addItemToCart(currentCart.id, product.id, 1);
-    }
-  }
-
-  private addItemToCart(cartId: number, productId: number, quantity: number): void {
-    this.cartService.addItemToCart(cartId, productId, quantity).subscribe({
-      next: () => console.log('Item added to cart'),
-      error: err => console.error('Error adding to cart', err)
+    this.cartService.addItem(product.id, 1).subscribe({
+      next: () => console.log('Item added'),
+      error: (err: any) => console.error('Error adding', err)
     });
   }
 

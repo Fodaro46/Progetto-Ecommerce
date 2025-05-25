@@ -1,10 +1,12 @@
 package com.esempio.Ecommerce.api.controller.Cart;
 
+import com.esempio.Ecommerce.api.dto.request.CartItemRequest;
 import com.esempio.Ecommerce.api.dto.response.CartItemResponse;
 import com.esempio.Ecommerce.domain.entity.Cart;
 import com.esempio.Ecommerce.domain.entity.CartItem;
 import com.esempio.Ecommerce.service.CartService;
 import com.esempio.Ecommerce.service.CartItemService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -52,12 +54,15 @@ public class CartController {
     }
 
     @PostMapping("/active")
-    public ResponseEntity<Cart> addItemToCart(@RequestBody CartItem cartItem) {
+    public ResponseEntity<Cart> addItemToCart(@Valid @RequestBody CartItemRequest request) {
         String userId = getAuthenticatedUserId();
-        Cart cart = cartService.addItemToCart(userId, cartItem.getProduct().getId(), cartItem.getQuantity());
+        Cart cart = cartService.addItemToCart(
+                userId,
+                request.productId(),
+                request.quantity()
+        );
         return ResponseEntity.ok(cart);
     }
-
     @PutMapping("/items/{itemId}")
     public ResponseEntity<CartItemResponse> updateCartItemQuantity(
             @PathVariable Long itemId,
