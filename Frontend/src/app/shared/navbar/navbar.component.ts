@@ -5,21 +5,22 @@ import { CartService } from '@services/cart.service';
 import { KeycloakService } from '@services/keycloak.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { CartResponse } from '@models/cart-response.model';
+import { CartPreviewComponent } from '@shared/cart-preview/cart-preview.component';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, CartPreviewComponent],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent implements OnInit {
-  // Osservabili per autenticazione e ruolo admin
   isAuthenticated$: Observable<boolean>;
   isAdmin$: Observable<boolean>;
-
-  // Conteggio articoli nel carrello
   count$: Observable<number>;
+  cart$: Observable<CartResponse | null>;
+  isCartPreviewOpen = false;
 
   constructor(
     private keycloak: KeycloakService,
@@ -31,6 +32,7 @@ export class NavbarComponent implements OnInit {
       map(auth => auth && this.keycloak.hasRealmRole('admin'))
     );
     this.count$ = this.cartService.count$;
+    this.cart$ = this.cartService.cart$;
   }
 
   ngOnInit(): void {}
@@ -49,5 +51,17 @@ export class NavbarComponent implements OnInit {
 
   goAdmin(): void {
     this.router.navigate(['/admin']);
+  }
+
+  toggleCartPreview(): void {
+    if (this.keycloak.isLoggedIn) {
+      this.isCartPreviewOpen = !this.isCartPreviewOpen;
+    } else {
+      this.keycloak.login();
+    }
+  }
+
+  trackByItem(index: number, item: CartResponse): number {
+    return item?.id ?? index;
   }
 }

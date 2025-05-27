@@ -1,0 +1,31 @@
+<ng-container *ngIf="cart as c">
+  <div class="cart-panel" *ngIf="c?.cartItems && c.cartItems.length > 0; else emptyCart">
+    <h3>Il tuo carrello</h3>
+
+    <div class="cart-items">
+      <div class="item" *ngFor="let item of c.cartItems; trackBy: trackByItem">
+        <img [src]="item.productImageUrl" [alt]="item.productName" />
+        <div class="details">
+          <h4>{{ item.productName }}</h4>
+          <p>Quantità: {{ item.quantity }}</p>
+          <p>Prezzo unitario: €{{ item.unitPrice | number: '1.2-2' }}</p>
+          <p>Totale: €{{ item.totalPrice | number: '1.2-2' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary">
+      <span>Totale:</span>
+      <strong>{{ c.totalPrice | number: '1.2-2' }} €</strong>
+    </div>
+
+    <div class="actions">
+      <button routerLink="/cart" (click)="toggle()">Visualizza</button>
+      <button routerLink="/checkout" (click)="toggle()">Cassa</button>
+    </div>
+  </div>
+
+  <ng-template #emptyCart>
+    <p class="empty-msg">Il carrello è vuoto.</p>
+  </ng-template>
+</ng-container>

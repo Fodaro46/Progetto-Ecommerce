@@ -2,9 +2,8 @@ package com.esempio.Ecommerce.api.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.Builder;
 
-@Builder
+
 public record CartItemRequest(
         @NotNull(message = "Cart ID is required")
         Long cartId,

@@ -11,7 +11,7 @@ import { CartItemResponse } from '@models/cart-item-response.model';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './cart.component.html',
-  styleUrls: ['./cart.component.scss'],
+  styleUrls: ['./cart.component.scss']
 })
 export class CartComponent implements OnInit {
   cart: CartResponse | null = null;
@@ -21,35 +21,37 @@ export class CartComponent implements OnInit {
   private router = inject(Router);
 
   ngOnInit(): void {
-    // merge guest items then load active cart
-    const userId = this.keycloakService.profile?.id;
-    if (!userId) return;
-    this.cartService.mergeLocalOnLogin().subscribe({
-      next: (cart: CartResponse) => (this.cart = cart),
-      error: (err: any) => console.error('Merge error', err)
+    if (!this.keycloakService.isLoggedIn) {
+      this.router.navigate(['/']);
+      return;
+    }
+
+    this.cartService.fetchActiveCart().subscribe({
+      next: cart => this.cart = cart,
+      error: err => console.error('Errore caricamento carrello', err)
     });
   }
 
   updateQuantity(item: CartItemResponse, newQuantity: number): void {
     if (newQuantity > 0) {
       this.cartService.updateItem(item.id, newQuantity).subscribe({
-        next: (cart: CartResponse) => (this.cart = cart),
-        error: (err: any) => console.error('Error updating quantity', err)
+        next: cart => this.cart = cart,
+        error: err => console.error('Errore aggiornamento quantità', err)
       });
     }
   }
 
   removeItem(item: CartItemResponse): void {
     this.cartService.removeItem(item.id).subscribe({
-      next: (cart: CartResponse) => (this.cart = cart),
-      error: (err: any) => console.error('Error removing item', err)
+      next: cart => this.cart = cart,
+      error: err => console.error('Errore rimozione item', err)
     });
   }
 
   clearCart(): void {
     this.cartService.clearCart().subscribe({
-      next: () => (this.cart = null),
-      error: (err: any) => console.error('Error clearing cart', err)
+      next: () => this.cart = null,
+      error: err => console.error('Errore svuotamento carrello', err)
     });
   }
 

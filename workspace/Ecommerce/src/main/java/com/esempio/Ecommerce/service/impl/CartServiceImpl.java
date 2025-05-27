@@ -25,7 +25,9 @@ public class CartServiceImpl implements CartService {
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
 
-    public CartServiceImpl(CartRepository cartRepository, CartItemRepository cartItemRepository, ProductRepository productRepository) {
+    public CartServiceImpl(CartRepository cartRepository,
+                           CartItemRepository cartItemRepository,
+                           ProductRepository productRepository) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
@@ -36,39 +38,38 @@ public class CartServiceImpl implements CartService {
     public Cart addItemToCart(String userId, Long productId, Integer quantity) {
         Cart cart = cartRepository.findByUserIdAndIsActiveTrue(userId)
                 .orElseGet(() -> createNewCart(userId));
-
         cart = entityManager.find(Cart.class, cart.getId(), LockModeType.PESSIMISTIC_WRITE);
-
         addOrUpdateCartItem(cart, productId, quantity);
+        return entityManager.merge(cart);
+    }
 
-        return cart;
+    @Override
+    @Transactional
+    public Cart addItemToCart(Long cartId, Long productId, Integer quantity) {
+        Cart cart = entityManager.find(Cart.class, cartId, LockModeType.PESSIMISTIC_WRITE);
+        if (cart == null) {
+            throw new IllegalArgumentException("Cart not found: " + cartId);
+        }
+        addOrUpdateCartItem(cart, productId, quantity);
+        return entityManager.merge(cart);
     }
 
     private void addOrUpdateCartItem(Cart cart, Long productId, Integer quantity) {
         Optional<CartItem> existingItem = cartItemRepository.findByCartIdAndProductId(cart.getId(), productId);
-
         if (existingItem.isPresent()) {
             CartItem item = existingItem.get();
             item.setQuantity(item.getQuantity() + quantity);
             cartItemRepository.save(item);
         } else {
             Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
+                    .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
 
             CartItem newItem = new CartItem();
             newItem.setCart(cart);
             newItem.setProduct(product);
             newItem.setQuantity(quantity);
-
             cartItemRepository.save(newItem);
         }
-    }
-
-    public Cart createNewCart(String userId) {
-        Cart newCart = new Cart();
-        newCart.setUserId(userId);
-        newCart.setIsActive(true);
-        return cartRepository.save(newCart);
     }
 
     @Override
@@ -79,5 +80,25 @@ public class CartServiceImpl implements CartService {
     @Override
     public List<CartItem> getCartItems(Long cartId) {
         return cartItemRepository.findByCartId(cartId);
+    }
+
+    @Override
+    @Transactional
+    public Cart createNewCart(String userId) {
+        Cart newCart = new Cart();
+        newCart.setUserId(userId);
+        newCart.setIsActive(true);
+        return cartRepository.save(newCart);
+    }
+
+    @Override
+    @Transactional
+    public void clearCart(Long cartId) {
+        List<CartItem> items = cartItemRepository.findByCartId(cartId);
+        items.forEach(cartItemRepository::delete);
+        cartRepository.findById(cartId).ifPresent(cart -> {
+            cart.setIsActive(false);
+            cartRepository.save(cart);
+        });
     }
 }

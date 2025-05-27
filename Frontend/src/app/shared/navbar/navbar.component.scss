@@ -27,7 +27,9 @@
       cursor: pointer;
       transition: all 0.3s ease;
       border-radius: 5px;
-
+      .cart-preview.open .cart-panel {
+        transform: translateX(0);
+      }
       &:hover {
         background: #fff;
         color: #000;

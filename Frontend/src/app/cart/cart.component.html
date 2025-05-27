@@ -2,8 +2,8 @@
   <div class="cart-container">
     <h2>Il tuo carrello</h2>
 
-    <ng-container *ngIf="c.items.length > 0; else emptyCart">
-      <div class="cart-item" *ngFor="let item of c.items">
+    <ng-container *ngIf="c.cartItems.length > 0; else emptyCart">
+      <div class="cart-item" *ngFor="let item of c.cartItems">
         <div class="item-info">
           <p><strong>{{ item.productName }}</strong></p>
           <img
@@ -13,7 +13,7 @@
             height="80"
             style="object-fit: cover; border-radius: 0.5rem;"
           />
-          <p>Prezzo unitario: €{{ item.unitPrice }}</p>
+          <p>Prezzo unitario: €{{ item.unitPrice | number: '1.2-2' }}</p>
           <p>
             Quantità:
             <input
@@ -24,19 +24,19 @@
               (change)="updateQuantity(item, qtyInput.valueAsNumber)"
             />
           </p>
-          <p>Totale: €{{ item.totalPrice }}</p>
+          <p>Totale: €{{ item.totalPrice | number: '1.2-2' }}</p>
         </div>
         <button (click)="removeItem(item)">Rimuovi</button>
       </div>
 
       <div class="cart-summary">
         <p><strong>Totale prodotti:</strong> {{ c.totalItems }}</p>
-        <p><strong>Prezzo totale:</strong> €{{ c.totalPrice }}</p>
+        <p><strong>Prezzo totale:</strong> €{{ c.totalPrice | number: '1.2-2' }}</p>
       </div>
 
       <div class="cart-actions">
         <button (click)="clearCart()">Svuota carrello</button>
-        <button (click)="proceedToCheckout()" [disabled]="c.items.length === 0">
+        <button (click)="proceedToCheckout()" [disabled]="c.cartItems.length === 0">
           Procedi al checkout...
         </button>
       </div>

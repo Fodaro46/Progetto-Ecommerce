@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { NavbarComponent } from '@shared/navbar/navbar.component';
 import { ProductService } from '@services/product.service';
 import { CartService } from '@services/cart.service';
 import { KeycloakService } from '@services/keycloak.service';
@@ -10,7 +9,7 @@ import { ProductResponse } from '@models/product-response.model';
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, NavbarComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.scss']
 })
@@ -46,19 +45,20 @@ export class ProductListComponent implements OnInit {
     this.router.navigate(['/products', id]);
   }
 
-  async addToCart(product: ProductResponse): Promise<void> {
+  addToCart(product: ProductResponse): void {
     if (!product.inStock) {
-      alert('Prodotto non disponibile.');
+      alert('Prodotto non disponibile');
       return;
     }
-    const tokenExpired = await this.keycloakService.isTokenExpired();
-    if (tokenExpired) {
-      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url }});
+
+    if (!this.keycloakService.isLoggedIn) {
+      this.keycloakService.login();
       return;
     }
+
     this.cartService.addItem(product.id, 1).subscribe({
-      next: () => console.log('Item added'),
-      error: (err: any) => console.error('Error adding', err)
+      next: cart => console.log('Aggiunto al carrello', cart),
+      error: err => console.error('Errore aggiunta al carrello', err)
     });
   }
 

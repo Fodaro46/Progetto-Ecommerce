@@ -153,4 +153,7 @@ export class KeycloakService {
   hasResourceRole(role: string, resource: string): boolean {
     return this.keycloak.hasResourceRole(role, resource);
   }
+  public get isLoggedIn(): boolean {
+    return this._isAuthenticated.value;
+  }
 }

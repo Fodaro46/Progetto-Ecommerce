@@ -9,8 +9,10 @@ import com.esempio.Ecommerce.service.CartItemService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,14 +26,30 @@ public class CartController {
     private final CartItemService cartItemService;
 
     @Autowired
-    public CartController(CartService cartService, CartItemService cartItemService) {
+    public CartController(CartService cartService,
+                          CartItemService cartItemService) {
         this.cartService = cartService;
         this.cartItemService = cartItemService;
     }
 
     private String getAuthenticatedUserId() {
-        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return jwt.getClaim("sub"); // Keycloak User ID (UUID)
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        if (auth instanceof JwtAuthenticationToken jwtAuth) {
+            Jwt jwt = jwtAuth.getToken();
+            return jwt.getSubject();
+        }
+
+        Object principal = auth.getPrincipal();
+        if (principal instanceof String) {
+            return (String) principal;
+        } else if (principal instanceof Jwt jwt) {
+            return jwt.getSubject();
+        }
+
+        return auth.getName();
     }
 
     @GetMapping("/active")
@@ -39,12 +57,12 @@ public class CartController {
         String userId = getAuthenticatedUserId();
         Optional<Cart> cart = cartService.getActiveCartForUser(userId);
 
-        // Se non esiste il carrello, crealo
         if (cart.isEmpty()) {
-            cart = Optional.of(cartService.createNewCart(userId));  // Modificato il nome del metodo
+            cart = Optional.of(cartService.createNewCart(userId));
         }
 
-        return cart.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return cart.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{cartId}/items")
@@ -54,20 +72,24 @@ public class CartController {
     }
 
     @PostMapping("/active")
-    public ResponseEntity<Cart> addItemToCart(@Valid @RequestBody CartItemRequest request) {
-        String userId = getAuthenticatedUserId();
+    public ResponseEntity<Cart> addItemToCart(
+            @Valid @RequestBody CartItemRequest request
+    ) {
         Cart cart = cartService.addItemToCart(
-                userId,
+                request.cartId(),
                 request.productId(),
                 request.quantity()
         );
         return ResponseEntity.ok(cart);
     }
+
     @PutMapping("/items/{itemId}")
     public ResponseEntity<CartItemResponse> updateCartItemQuantity(
             @PathVariable Long itemId,
-            @RequestParam Integer quantity) {
-        CartItemResponse response = cartItemService.updateItemQuantity(itemId, quantity);
+            @RequestParam Integer quantity
+    ) {
+        CartItemResponse response =
+                cartItemService.updateItemQuantity(itemId, quantity);
         return ResponseEntity.ok(response);
     }
 
@@ -80,15 +102,11 @@ public class CartController {
     @DeleteMapping("/active")
     public ResponseEntity<Void> clearCart() {
         String userId = getAuthenticatedUserId();
-        // Ottieni il carrello attivo e rimuovi tutti gli item
-        Optional<Cart> activeCartOpt = cartService.getActiveCartForUser(userId);
-        if (activeCartOpt.isPresent()) {
-            Cart activeCart = activeCartOpt.get();
-            List<CartItem> items = cartService.getCartItems(activeCart.getId());
-            items.forEach(item -> cartItemService.removeItem(item.getId()));
+        Optional<Cart> opt = cartService.getActiveCartForUser(userId);
+        if (opt.isPresent()) {
+            cartService.clearCart(opt.get().getId());
             return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
     }
 }

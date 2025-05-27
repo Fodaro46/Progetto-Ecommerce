@@ -4,7 +4,6 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ProductResponse } from '@models/product-response.model';
 import { ProductRequest } from '@models/product-request.model';
-import { environment } from '@env';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {

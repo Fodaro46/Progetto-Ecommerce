@@ -1,18 +1,32 @@
 <nav class="navbar">
   <div class="logo" routerLink="/home">V3rc1</div>
+
   <ul class="nav-links">
     <li><a routerLink="/products">Prodotti</a></li>
-    <li *ngIf="isAuthenticated$ | async"><a routerLink="/orders">I tuoi ordini</a></li>
-    <li *ngIf="isAdmin$ | async"><button (click)="goAdmin()">Admin</button></li>
+    <li *ngIf="isAuthenticated$ | async">
+      <a routerLink="/orders">I tuoi ordini</a>
+    </li>
+    <li *ngIf="isAdmin$ | async">
+      <button (click)="goAdmin()">Admin</button>
+    </li>
   </ul>
+
   <div class="actions">
-    <a routerLink="/cart" class="cart-icon">
-      <i class="icon-cart"></i>
-      <span class="badge" *ngIf="count$ | async as c">{{ c }}</span>
-    </a>
+    <button (click)="toggleCartPreview()" class="cart-button">
+      🛒
+      <ng-container *ngIf="count$ | async as count">
+        <span *ngIf="count > 0" class="cart-count">{{ count }}</span>
+      </ng-container>
+    </button>
+
     <button *ngIf="!(isAuthenticated$ | async)" (click)="login()">Accedi</button>
     <button *ngIf="!(isAuthenticated$ | async)" (click)="register()">Registrati</button>
     <button *ngIf="isAuthenticated$ | async" (click)="logout()">Logout</button>
   </div>
 </nav>
 
+<app-cart-preview
+  *ngIf="isCartPreviewOpen"
+  [cart]="cart$ | async"
+  (close)="toggleCartPreview()"
+/>

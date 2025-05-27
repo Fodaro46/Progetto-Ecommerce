@@ -1,9 +1,9 @@
-import {CartItemResponse} from './cart-item-response.model';
+import {CartItemResponse} from '@models/cart-item-response.model';
 
 export interface CartResponse {
   id: number;
   userId: string;
-  items: CartItemResponse[];
+  cartItems: CartItemResponse[]; // ✅ corretto
   totalPrice: number;
   totalItems: number;
   isActive: boolean;
