@@ -13,6 +13,8 @@ import { CartResponse } from '@models/cart-response.model';
 export class CartPreviewComponent {
   @Input() cart: CartResponse | null = null;
   @Output() close = new EventEmitter<void>();
+  @Output() removeItem = new EventEmitter<number>();
+  @Output() clearCart = new EventEmitter<void>();
 
   closePanel(): void {
     this.close.emit();

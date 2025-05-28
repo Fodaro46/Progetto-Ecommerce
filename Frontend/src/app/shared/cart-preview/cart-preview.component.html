@@ -11,8 +11,16 @@
           <p>Prezzo unitario: €{{ item.unitPrice | number: '1.2-2' }}</p>
           <p>Totale: €{{ item.totalPrice | number: '1.2-2' }}</p>
         </div>
+        <button (click)="removeItem.emit(item.id)">Rimuovi</button>
       </div>
     </div>
+    <!-- Svuota tutto -->
+    <div class="actions">
+      <button (click)="clearCart.emit()">Svuota carrello</button>
+      <button routerLink="/cart" (click)="close.emit()">Visualizza</button>
+      <button routerLink="/checkout" (click)="close.emit()">Cassa</button>
+    </div>
+
 
     <div class="summary">
       <span>Totale:</span>

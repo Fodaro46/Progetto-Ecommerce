@@ -1,40 +1,22 @@
-
-<section class="product-list-section">
-  <h2 class="section-title">Elenco Prodotti</h2>
-
-  <div *ngIf="loading" class="loader">Caricamento prodotti...</div>
-  <div *ngIf="error" class="error-msg">{{ error }}</div>
-
-  <div class="grid-container" *ngIf="!loading && !error">
-    <div *ngFor="let p of products" class="card">
-      <div class="card-img">
-        <img
-          [src]="p.imageUrl"
-          alt="{{ p.name }}"
-          loading="lazy"
-          (error)="onImageError(p)"
-        />
-      </div>
-      <div class="card-body">
-        <h3
-          class="card-title"
-          (click)="viewProductDetails(p.id)"
-        >
-          {{ p.name }}
-        </h3>
-        <p class="card-desc">{{ p.description }}</p>
-        <div class="card-footer">
-          <span class="price">{{ p.price | currency:'EUR':'symbol' }}</span>
-          <button
-            (click)="addToCart(p)"
-            [disabled]="!p.inStock"
-            class="btn-add"
-          >
-            <span *ngIf="p.inStock">Aggiungi</span>
-            <span *ngIf="!p.inStock">Esaurito</span>
-          </button>
-        </div>
-      </div>
+<div class="product-list">
+  <div class="product-card" *ngFor="let product of products">
+    <img [src]="product.imageUrl" alt="{{ product.name }}" (error)="onImageError($event)" />
+    <div class="product-info">
+      <h3>{{ product.name }}</h3>
+      <p class="description">{{ product.description }}</p>
+      <p class="price">€{{ product.price.toFixed(2) }}</p>
+      <p class="availability" [ngClass]="{ 'in-stock': product.inStock, 'out-of-stock': !product.inStock }">
+        {{ product.inStock ? 'Disponibile' : 'Non disponibile' }}
+      </p>
+      <p *ngIf="product.inStock">
+        <strong>Quantità disponibile:</strong> {{ product.availableQuantity }}
+      </p>
+      <button
+        [disabled]="!product.inStock"
+        (click)="addToCart(product.id)"
+        class="add-to-cart">
+        Aggiungi al carrello
+      </button>
     </div>
   </div>
-</section>
+</div>

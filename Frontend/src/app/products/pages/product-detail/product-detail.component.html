@@ -1,9 +1,6 @@
 <div *ngIf="product; else loadingOrError" class="product-detail">
   <div class="img-container">
-    <img
-      [src]="product.imageUrl"
-      alt="{{ product.name }}"
-    />
+    <img [src]="product.imageUrl" alt="{{ product.name }}" />
   </div>
   <h2>{{ product.name }}</h2>
   <p>{{ product.description }}</p>
@@ -11,6 +8,9 @@
   <p>
     <strong>Disponibilità:</strong>
     {{ product.inStock ? 'Disponibile' : 'Non disponibile' }}
+  </p>
+  <p *ngIf="product.inStock">
+    <strong>Quantità disponibile:</strong> {{ product.availableQuantity }}
   </p>
   <button
     (click)="addToCart()"

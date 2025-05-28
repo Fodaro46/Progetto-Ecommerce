@@ -17,7 +17,7 @@ public interface CartItemMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "productId", source = "product.id")
     @Mapping(target = "productName", source = "product.name")
-    @Mapping(target = "productImageUrl", ignore = true)
+    @Mapping(target = "productImageUrl", source = "product.imageUrl")
     @Mapping(target = "unitPrice", expression = "java(cartItem.getProduct().getPrice())")
     @Mapping(target = "quantity", source = "quantity")
     @Mapping(target = "totalPrice", expression = "java(calculateTotalPrice(cartItem))")

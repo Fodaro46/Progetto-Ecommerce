@@ -3,7 +3,7 @@ import {CartItemResponse} from '@models/cart-item-response.model';
 export interface CartResponse {
   id: number;
   userId: string;
-  cartItems: CartItemResponse[]; // ✅ corretto
+  cartItems: CartItemResponse[];
   totalPrice: number;
   totalItems: number;
   isActive: boolean;

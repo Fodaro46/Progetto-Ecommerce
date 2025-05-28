@@ -21,22 +21,26 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('ROLE_utente')")
     public ResponseEntity<OrderResponse> createOrder(
             @RequestBody OrderRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        OrderResponse response = orderService.createOrder(request, jwt.getSubject());
+        String userId = jwt.getSubject();
+        OrderResponse response = orderService.createOrder(request, userId);
         return ResponseEntity
                 .created(URI.create("/api/orders/" + response.id()))
                 .body(response);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_utente') or hasRole('admin')")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.getOrderById(id));
     }
+
     @GetMapping("/my")
+    @PreAuthorize("hasAuthority('ROLE_utente')")
     public ResponseEntity<List<OrderResponse>> getMyOrders(@AuthenticationPrincipal Jwt jwt) {
         List<OrderResponse> orders = orderService.getUserOrders(jwt.getSubject());
         return ResponseEntity.ok(orders);
@@ -46,9 +50,9 @@ public class OrderController {
     @PreAuthorize("hasRole('admin')")
     public ResponseEntity<OrderResponse> updateOrderStatus(
             @PathVariable Long orderId,
-            @RequestParam String newStatus) { // riceviamo il nuovo stato come parametro
+            @RequestParam String newStatus
+    ) {
         OrderResponse response = orderService.updateOrderStatus(orderId, newStatus);
         return ResponseEntity.ok(response);
     }
-
-    }
+}

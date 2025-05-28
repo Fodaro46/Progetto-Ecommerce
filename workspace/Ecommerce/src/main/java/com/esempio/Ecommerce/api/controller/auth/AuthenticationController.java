@@ -40,7 +40,7 @@ public class AuthenticationController {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
 
-            // Verifica scadenza token
+            //scadenza token
             JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
             if (claims.getExpirationTime().before(new Date())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token expired");
@@ -79,8 +79,6 @@ public class AuthenticationController {
             throw new JWTVerificationException("Signature verification failed: " + e.getMessage());
         }
     }
-
-    // Aggiungi questa classe in un file separato o nella parte inferiore
     private static class JWTVerificationException extends Exception {
         public JWTVerificationException(String message) {
             super(message);

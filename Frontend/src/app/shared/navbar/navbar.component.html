@@ -29,4 +29,6 @@
   *ngIf="isCartPreviewOpen"
   [cart]="cart$ | async"
   (close)="toggleCartPreview()"
+  (clearCart)="clearCart()"
+  (removeItem)="removeCartItem($event)"
 />

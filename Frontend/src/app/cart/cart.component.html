@@ -13,7 +13,7 @@
             height="80"
             style="object-fit: cover; border-radius: 0.5rem;"
           />
-          <p>Prezzo unitario: €{{ item.unitPrice | number: '1.2-2' }}</p>
+          <p>Prezzo unitario: €{{ item.unitPrice }}</p>
           <p>
             Quantità:
             <input
@@ -24,14 +24,14 @@
               (change)="updateQuantity(item, qtyInput.valueAsNumber)"
             />
           </p>
-          <p>Totale: €{{ item.totalPrice | number: '1.2-2' }}</p>
+          <p>Totale: €{{ item.totalPrice }}</p>
         </div>
         <button (click)="removeItem(item)">Rimuovi</button>
       </div>
 
       <div class="cart-summary">
         <p><strong>Totale prodotti:</strong> {{ c.totalItems }}</p>
-        <p><strong>Prezzo totale:</strong> €{{ c.totalPrice | number: '1.2-2' }}</p>
+        <p><strong>Prezzo totale:</strong> €{{ c.totalPrice }}</p>
       </div>
 
       <div class="cart-actions">

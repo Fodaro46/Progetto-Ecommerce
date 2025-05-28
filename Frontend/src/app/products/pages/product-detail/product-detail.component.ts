@@ -48,16 +48,18 @@ export class ProductDetailComponent implements OnInit {
 
   async addToCart(): Promise<void> {
     if (!this.product) return;
+
     if (!this.product.inStock) {
       alert('Prodotto non disponibile.');
       return;
     }
+
     const tokenExpired = await this.keycloakService.isTokenExpired();
     if (tokenExpired) {
       this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url }});
       return;
     }
-    // aggiunge direttamente e il service crea il cart se necessario
+
     this.cartService.addItem(this.product.id, 1).subscribe({
       next: () => console.log('Aggiunto al carrello'),
       error: (err: any) => console.error('Errore aggiunta', err)

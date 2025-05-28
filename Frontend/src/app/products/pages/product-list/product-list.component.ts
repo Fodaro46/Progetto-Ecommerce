@@ -34,35 +34,26 @@ export class ProductListComponent implements OnInit {
         this.loading = false;
       },
       error: err => {
-        console.error('Load products error', err);
+        console.error('Errore caricamento prodotti', err);
         this.error = 'Errore caricamento prodotti.';
         this.loading = false;
       }
     });
   }
 
-  viewProductDetails(id: number): void {
-    this.router.navigate(['/products', id]);
-  }
-
-  addToCart(product: ProductResponse): void {
-    if (!product.inStock) {
-      alert('Prodotto non disponibile');
-      return;
-    }
-
+  addToCart(productId: number): void {
     if (!this.keycloakService.isLoggedIn) {
       this.keycloakService.login();
       return;
     }
 
-    this.cartService.addItem(product.id, 1).subscribe({
+    this.cartService.addItem(productId, 1).subscribe({
       next: cart => console.log('Aggiunto al carrello', cart),
       error: err => console.error('Errore aggiunta al carrello', err)
     });
-  }
+}
 
-  onImageError(product: ProductResponse): void {
-    product.imageUrl = this.fallbackImage;
+  onImageError(event: Event): void {
+    (event.target as HTMLImageElement).src = this.fallbackImage;
   }
 }
