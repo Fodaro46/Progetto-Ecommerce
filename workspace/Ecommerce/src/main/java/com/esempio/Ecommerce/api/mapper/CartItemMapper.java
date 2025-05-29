@@ -18,9 +18,9 @@ public interface CartItemMapper {
     @Mapping(target = "productId", source = "product.id")
     @Mapping(target = "productName", source = "product.name")
     @Mapping(target = "productImageUrl", source = "product.imageUrl")
-    @Mapping(target = "unitPrice", expression = "java(cartItem.getProduct().getPrice())")
+    @Mapping(target = "unitPrice", source = "product.price", qualifiedByName = "safePrice")
     @Mapping(target = "quantity", source = "quantity")
-    @Mapping(target = "totalPrice", expression = "java(calculateTotalPrice(cartItem))")
+    @Mapping(target = "totalPrice", source = ".", qualifiedByName = "calculateTotalPrice")
     CartItemResponse toDto(CartItem cartItem);
 
     List<CartItemResponse> toDtoList(List<CartItem> cartItems);
@@ -32,12 +32,18 @@ public interface CartItemMapper {
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     CartItem toEntity(CartItemRequest cartItemRequest);
 
+    @Named("safePrice")
+    default Double safePrice(Double price) {
+        return price != null ? price : 0.0;
+    }
+
     @Named("calculateTotalPrice")
     default Double calculateTotalPrice(CartItem cartItem) {
         if (cartItem.getProduct() == null || cartItem.getQuantity() == null) {
             return 0.0;
         }
-        return cartItem.getProduct().getPrice() * cartItem.getQuantity();
+        Double price = cartItem.getProduct().getPrice();
+        return price != null ? price * cartItem.getQuantity() : 0.0;
     }
 
     default CartItem createCartItem(Cart cart, Product product, Integer quantity) {

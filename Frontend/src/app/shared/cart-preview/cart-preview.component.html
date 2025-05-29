@@ -1,9 +1,9 @@
 <ng-container *ngIf="cart as c">
-  <div class="cart-panel" *ngIf="c?.cartItems && c.cartItems.length > 0; else emptyCart">
+  <div class="cart-panel" *ngIf="c?.items && c.items.length > 0; else emptyCart">
     <h3>Il tuo carrello</h3>
 
     <div class="cart-items">
-      <div class="item" *ngFor="let item of c.cartItems; trackBy: trackByItem">
+      <div class="item" *ngFor="let item of c.items; trackBy: trackByItem">
         <img [src]="item.productImageUrl" [alt]="item.productName" />
         <div class="details">
           <h4>{{ item.productName }}</h4>
@@ -14,13 +14,12 @@
         <button (click)="removeItem.emit(item.id)">Rimuovi</button>
       </div>
     </div>
-    <!-- Svuota tutto -->
+
     <div class="actions">
       <button (click)="clearCart.emit()">Svuota carrello</button>
       <button routerLink="/cart" (click)="close.emit()">Visualizza</button>
       <button routerLink="/checkout" (click)="close.emit()">Cassa</button>
     </div>
-
 
     <div class="summary">
       <span>Totale:</span>

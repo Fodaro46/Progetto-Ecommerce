@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { tap, switchMap } from 'rxjs/operators';
 import { CartResponse } from '@models/cart-response.model';
-import { CartItemResponse } from '@models/cart-item-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
@@ -17,7 +16,6 @@ export class CartService {
 
   constructor(private http: HttpClient) {}
 
-  /** Carica (o crea) il carrello attivo e aggiorna i BehaviorSubject */
   fetchActiveCart(): Observable<CartResponse> {
     return this.http
       .get<CartResponse>(`${this.BASE_URL}/active`, { withCredentials: true })
@@ -32,34 +30,31 @@ export class CartService {
   addItem(productId: number, quantity: number): Observable<CartResponse> {
     return this.fetchActiveCart().pipe(
       switchMap(cart =>
-        this.postRawAddItem({
-          cartId: cart.id,
-          productId,
-          quantity
-        })
+        this.http
+          .post<CartResponse>(
+            `${this.BASE_URL}/active`,
+            {
+              cartId: cart.id,
+              productId,
+              quantity
+            },
+            { withCredentials: true }
+          )
+          .pipe(
+            tap(updatedCart => {
+              this.cartSubject.next(updatedCart);
+              this.countSubject.next(updatedCart.totalItems);
+            })
+          )
       )
     );
   }
 
-  postRawAddItem(body: {
-    cartId: number;
-    productId: number;
-    quantity: number;
-  }): Observable<CartResponse> {
-    return this.http
-      .post<CartResponse>(`${this.BASE_URL}/active`, body, { withCredentials: true })
-      .pipe(
-        tap(cart => {
-          this.cartSubject.next(cart);
-          this.countSubject.next(cart.totalItems);
-        })
-      );
-  }
-
   updateItem(itemId: number, quantity: number): Observable<CartResponse> {
     const params = new HttpParams().set('quantity', quantity.toString());
+
     return this.http
-      .put<CartItemResponse>(`${this.BASE_URL}/items/${itemId}`, null, {
+      .put<void>(`${this.BASE_URL}/items/${itemId}`, null, {
         params,
         withCredentials: true
       })
@@ -76,14 +71,11 @@ export class CartService {
       );
   }
 
-  clearCart(): Observable<void> {
+  clearCart(): Observable<CartResponse> {
     return this.http
       .delete<void>(`${this.BASE_URL}/active`, { withCredentials: true })
       .pipe(
-        tap(() => {
-          this.cartSubject.next(null);
-          this.countSubject.next(0);
-        })
+        switchMap(() => this.fetchActiveCart())
       );
   }
 }

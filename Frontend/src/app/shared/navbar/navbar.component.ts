@@ -61,20 +61,11 @@ export class NavbarComponent implements OnInit {
     }
   }
 
-  trackByItem(index: number, item: CartResponse): number {
-    return item?.id ?? index;
-  }
   clearCart(): void {
-    this.cartService.clearCart().subscribe({
-      next: () => console.log('Carrello svuotato'),
-      error: err => console.error('Errore svuotamento carrello:', err)
-    });
+    this.cartService.clearCart().subscribe();
   }
 
   removeCartItem(itemId: number): void {
-    this.cartService.removeItem(itemId).subscribe({
-      next: () => console.log(`Elemento ${itemId} rimosso dal carrello`),
-      error: err => console.error('Errore rimozione elemento dal carrello:', err)
-    });
+    this.cartService.removeItem(itemId).subscribe();
   }
 }

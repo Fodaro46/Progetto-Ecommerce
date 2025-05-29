@@ -52,7 +52,22 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public List<CartItemResponse> getItemsByCartId(Long cartId) {
-        return cartItemMapper.toDtoList(cartItemRepository.findByCartId(cartId));
+        List<CartItem> items = cartItemRepository.findByCartId(cartId);
+
+        // 🔍 LOG utile per debugging
+        items.forEach(item -> {
+            System.out.println("🛒 CartItem ID: " + item.getId());
+            if (item.getProduct() != null) {
+                System.out.println("📦 Prodotto ID: " + item.getProduct().getId());
+                System.out.println("📛 Nome prodotto: " + item.getProduct().getName());
+                System.out.println("💶 Prezzo: " + item.getProduct().getPrice());
+                System.out.println("🖼️ Immagine: " + item.getProduct().getImageUrl());
+            } else {
+                System.out.println("❌ Prodotto mancante per item ID: " + item.getId());
+            }
+        });
+
+        return cartItemMapper.toDtoList(items);
     }
 
     @Override

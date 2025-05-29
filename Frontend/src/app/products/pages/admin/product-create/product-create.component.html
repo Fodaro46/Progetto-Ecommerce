@@ -2,97 +2,95 @@
   <h2>Crea nuovo prodotto</h2>
 
   <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
-    <div class="success-message" *ngIf="successMessage">
-      {{ successMessage }}
-    </div>
 
+    <!-- Nome -->
     <div class="form-group">
       <label for="name">Nome:</label>
-      <input
-        id="name"
-        formControlName="name"
-        [ngClass]="{'invalid': hasError('name')}"
-      />
-      <span class="error" *ngIf="hasError('name')">
-        {{ getErrorMessage('name') }}
-      </span>
+      <input id="name" formControlName="name" [ngClass]="{ 'invalid': hasError('name') }" />
+      <span class="error" *ngIf="hasError('name')">{{ getErrorMessage('name') }}</span>
     </div>
 
+    <!-- Categoria -->
     <div class="form-group">
       <label for="category">Categoria:</label>
-      <input
-        id="category"
-        formControlName="category"
-        [ngClass]="{'invalid': hasError('category')}"
-      />
-      <span class="error" *ngIf="hasError('category')">
-        {{ getErrorMessage('category') }}
-      </span>
+      <input id="category" formControlName="category" [ngClass]="{ 'invalid': hasError('category') }" />
+      <span class="error" *ngIf="hasError('category')">{{ getErrorMessage('category') }}</span>
     </div>
 
+    <!-- Descrizione -->
     <div class="form-group">
       <label for="description">Descrizione:</label>
-      <textarea
-        id="description"
-        formControlName="description"
-        rows="3"
-      ></textarea>
+      <textarea id="description" formControlName="description" rows="3"></textarea>
     </div>
 
+    <!-- Prezzo -->
     <div class="form-group">
       <label for="price">Prezzo (€):</label>
-      <input
-        id="price"
-        type="number"
-        formControlName="price"
-        step="0.01"
-        min="0.01"
-        [ngClass]="{'invalid': hasError('price')}"
-      />
-      <span class="error" *ngIf="hasError('price')">
-        {{ getErrorMessage('price') }}
-      </span>
+      <input id="price" type="number" formControlName="price" step="0.01" min="0.01" [ngClass]="{ 'invalid': hasError('price') }" />
+      <span class="error" *ngIf="hasError('price')">{{ getErrorMessage('price') }}</span>
     </div>
 
+    <!-- Quantità -->
     <div class="form-group">
       <label for="stockQuantity">Quantità:</label>
-      <input
-        id="stockQuantity"
-        type="number"
-        formControlName="stockQuantity"
-        min="0"
-        [ngClass]="{'invalid': hasError('stockQuantity')}"
-      />
-      <span class="error" *ngIf="hasError('stockQuantity')">
-        {{ getErrorMessage('stockQuantity') }}
-      </span>
+      <input id="stockQuantity" type="number" formControlName="stockQuantity" min="0" [ngClass]="{ 'invalid': hasError('stockQuantity') }" />
+      <span class="error" *ngIf="hasError('stockQuantity')">{{ getErrorMessage('stockQuantity') }}</span>
     </div>
 
+    <!-- URL Immagine -->
     <div class="form-group">
       <label for="imageUrl">URL Immagine:</label>
-      <input
-        id="imageUrl"
-        formControlName="imageUrl"
-        [ngClass]="{'invalid': hasError('imageUrl')}"
-      />
-      <span class="error" *ngIf="hasError('imageUrl')">
-        {{ getErrorMessage('imageUrl') }}
-      </span>
+      <input id="imageUrl" formControlName="imageUrl" [ngClass]="{ 'invalid': hasError('imageUrl') }" />
+      <span class="error" *ngIf="hasError('imageUrl')">{{ getErrorMessage('imageUrl') }}</span>
     </div>
 
+    <!-- Errore generale -->
     <div class="error-message" *ngIf="errorMessage">
       {{ errorMessage }}
     </div>
 
+    <!-- Submit -->
     <div class="form-actions">
-      <button
-        type="submit"
-        [disabled]="isSubmitting"
-        [class.submitting]="isSubmitting"
-      >
+      <button type="submit" [disabled]="isSubmitting" [class.submitting]="isSubmitting">
         <span *ngIf="!isSubmitting">Crea Prodotto</span>
-        <span *ngIf="isSubmitting">Creazione in corso...</span>
+        <span *ngIf="isSubmitting">
+          <i class="fa fa-spinner fa-spin"></i> Creazione in corso...
+        </span>
       </button>
     </div>
   </form>
+
+  <!-- Lista prodotti esistenti con modifica quantità -->
+  <div class="product-list" *ngIf="products.length > 0">
+    <h3>Prodotti esistenti</h3>
+    <table class="product-table">
+      <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Categoria</th>
+        <th>Prezzo (€)</th>
+        <th>Quantità disponibile</th>
+        <th>Azioni</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let p of products">
+        <td>{{ p.name }}</td>
+        <td>{{ p.category }}</td>
+        <td>€ {{ p.price | number:'1.2-2' }}</td>
+        <td>
+          <input
+            type="number"
+            [value]="p.availableQuantity"
+            min="0"
+            (change)="onQuantityChange(p, $any($event.target).value)"
+          />
+        </td>
+        <td>
+          <button (click)="deleteProduct(p.id)">Elimina</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
 </div>

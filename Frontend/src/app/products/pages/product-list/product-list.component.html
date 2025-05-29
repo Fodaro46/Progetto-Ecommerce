@@ -1,10 +1,29 @@
+<!-- Messaggio toast -->
+<div *ngIf="showAddedMessage" class="toast">
+  ✅ Prodotto aggiunto al carrello!
+</div>
+
 <div class="product-list">
   <div class="product-card" *ngFor="let product of products">
-    <img [src]="product.imageUrl" alt="{{ product.name }}" (error)="onImageError($event)" />
+    <!-- Immagine cliccabile -->
+    <a [routerLink]="['/products', product.id]">
+      <img
+        [src]="product.imageUrl"
+        loading="lazy"
+        alt="Immagine di {{ product.name }}"
+        (error)="onImageError($event)"
+        class="product-image"
+      />
+    </a>
+
     <div class="product-info">
-      <h3>{{ product.name }}</h3>
+      <!-- Nome cliccabile -->
+      <h3 class="clickable-title">
+        <a [routerLink]="['/products', product.id]">{{ product.name }}</a>
+      </h3>
+
       <p class="description">{{ product.description }}</p>
-      <p class="price">€{{ product.price.toFixed(2) }}</p>
+      <p class="price">€ {{ product.price.toFixed(2) }}</p>
       <p class="availability" [ngClass]="{ 'in-stock': product.inStock, 'out-of-stock': !product.inStock }">
         {{ product.inStock ? 'Disponibile' : 'Non disponibile' }}
       </p>
@@ -14,7 +33,8 @@
       <button
         [disabled]="!product.inStock"
         (click)="addToCart(product.id)"
-        class="add-to-cart">
+        class="add-to-cart"
+      >
         Aggiungi al carrello
       </button>
     </div>

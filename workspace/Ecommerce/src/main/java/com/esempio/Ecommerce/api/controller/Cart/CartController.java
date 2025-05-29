@@ -2,6 +2,7 @@ package com.esempio.Ecommerce.api.controller.Cart;
 
 import com.esempio.Ecommerce.api.dto.request.CartItemRequest;
 import com.esempio.Ecommerce.api.dto.response.CartItemResponse;
+import com.esempio.Ecommerce.api.dto.response.CartResponse;
 import com.esempio.Ecommerce.domain.entity.Cart;
 import com.esempio.Ecommerce.domain.entity.CartItem;
 import com.esempio.Ecommerce.service.CartService;
@@ -26,20 +27,16 @@ public class CartController {
     private final CartItemService cartItemService;
 
     @Autowired
-    public CartController(CartService cartService,
-                          CartItemService cartItemService) {
+    public CartController(CartService cartService, CartItemService cartItemService) {
         this.cartService = cartService;
         this.cartItemService = cartItemService;
     }
 
     private String getAuthenticatedUserId() {
-        Authentication auth = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth instanceof JwtAuthenticationToken jwtAuth) {
-            Jwt jwt = jwtAuth.getToken();
-            return jwt.getSubject();
+            return jwtAuth.getToken().getSubject();
         }
 
         Object principal = auth.getPrincipal();
@@ -53,16 +50,27 @@ public class CartController {
     }
 
     @GetMapping("/active")
-    public ResponseEntity<Cart> getActiveCart() {
+    public ResponseEntity<CartResponse> getActiveCart() {
         String userId = getAuthenticatedUserId();
-        Optional<Cart> cart = cartService.getActiveCartForUser(userId);
+        Optional<Cart> cartOpt = cartService.getActiveCartForUser(userId);
 
-        if (cart.isEmpty()) {
-            cart = Optional.of(cartService.createNewCart(userId));
-        }
+        Cart cart = cartOpt.orElseGet(() -> cartService.createNewCart(userId));
 
-        return cart.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        List<CartItemResponse> cartItems = cartItemService.getItemsByCartId(cart.getId());
+
+        double totalPrice = cartItems.stream()
+                .mapToDouble(CartItemResponse::totalPrice)
+                .sum();
+
+        CartResponse response = CartResponse.builder()
+                .id(cart.getId())
+                .userId(cart.getUserId())
+                .items(cartItems)
+                .totalPrice(totalPrice)
+                .totalItems(cartItems.size())
+                .isActive(cart.getIsActive())
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{cartId}/items")
@@ -72,15 +80,29 @@ public class CartController {
     }
 
     @PostMapping("/active")
-    public ResponseEntity<Cart> addItemToCart(
-            @Valid @RequestBody CartItemRequest request
-    ) {
+    public ResponseEntity<CartResponse> addItemToCart(@Valid @RequestBody CartItemRequest request) {
         Cart cart = cartService.addItemToCart(
                 request.cartId(),
                 request.productId(),
                 request.quantity()
         );
-        return ResponseEntity.ok(cart);
+
+        List<CartItemResponse> cartItems = cartItemService.getItemsByCartId(cart.getId());
+
+        double totalPrice = cartItems.stream()
+                .mapToDouble(CartItemResponse::totalPrice)
+                .sum();
+
+        CartResponse response = CartResponse.builder()
+                .id(cart.getId())
+                .userId(cart.getUserId())
+                .items(cartItems)
+                .totalPrice(totalPrice)
+                .totalItems(cartItems.size())
+                .isActive(cart.getIsActive())
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/items/{itemId}")
@@ -88,8 +110,7 @@ public class CartController {
             @PathVariable Long itemId,
             @RequestParam Integer quantity
     ) {
-        CartItemResponse response =
-                cartItemService.updateItemQuantity(itemId, quantity);
+        CartItemResponse response = cartItemService.updateItemQuantity(itemId, quantity);
         return ResponseEntity.ok(response);
     }
 

@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, NavigationEnd, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common'; // ⬅️ aggiungi questo
+import { filter } from 'rxjs/operators';
 import { KeycloakService } from '@services/keycloak.service';
 import { CartService } from '@services/cart.service';
 import { NavbarComponent } from '@shared/navbar/navbar.component';
@@ -9,31 +11,38 @@ import { NavbarComponent } from '@shared/navbar/navbar.component';
   standalone: true,
   imports: [
     RouterModule,
+    CommonModule, // ⬅️ aggiunto qui
     NavbarComponent,
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
+  isAdminRoute = false;
+  routeChecked = false; // ⬅️ nuova flag
+
   constructor(
     private keycloak: KeycloakService,
-    private cartService: CartService
+    private cartService: CartService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    // 1) Se sei admin, redirect
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      this.isAdminRoute = event.urlAfterRedirects.startsWith('/admin');
+      this.routeChecked = true; // ⬅️ route analizzata
+    });
+
     if (this.keycloak.hasRealmRole('admin')
       && !window.location.pathname.startsWith('/admin')) {
       window.location.href = '/admin';
       return;
     }
 
-    // 2) Fetch carrello solo se loggato
     if (this.keycloak.isLoggedIn) {
-      this.cartService.fetchActiveCart().subscribe({
-        next: cart => console.log('Carrello caricato', cart),
-        error: err => console.error('Errore fetch cart:', err)
-      });
+      this.cartService.fetchActiveCart().subscribe();
     }
   }
 }

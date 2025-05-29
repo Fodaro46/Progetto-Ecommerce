@@ -1,6 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OrderResponse } from '@models/order-response.model';
+import { OrderService } from '@services/order.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-order-list',
@@ -9,12 +11,34 @@ import { OrderResponse } from '@models/order-response.model';
   templateUrl: './order-list.component.html',
   styleUrls: ['./order-list.component.scss']
 })
-export class OrderListComponent {
-  @Input() orders: OrderResponse[] = [];
-  @Input() loading = false;
-  @Input() error: string | null = null;
-
+export class OrderListComponent implements OnInit {
+  orders: OrderResponse[] = [];
+  loading = false;
+  error: string | null = null;
   selectedOrderId: string | null = null;
+
+  constructor(private orderService: OrderService) {}
+
+  ngOnInit(): void {
+    this.loadOrders();
+  }
+
+  loadOrders(): void {
+    this.loading = true;
+    this.error = null;
+
+    this.orderService.getUserOrders().subscribe({
+      next: (orders) => {
+        this.orders = orders;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.error = 'Errore nel caricamento degli ordini';
+        this.loading = false;
+      }
+    });
+  }
 
   toggleOrderDetail(orderId: number): void {
     this.selectedOrderId = this.selectedOrderId === orderId.toString() ? null : orderId.toString();
@@ -32,9 +56,5 @@ export class OrderListComponent {
       hour: '2-digit',
       minute: '2-digit'
     });
-  }
-
-  loadOrders(): void {
-    // Da implementare: potresti emettere un evento Output se ti serve.
   }
 }

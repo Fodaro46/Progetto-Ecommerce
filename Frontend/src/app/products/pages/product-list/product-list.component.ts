@@ -5,6 +5,7 @@ import { ProductService } from '@services/product.service';
 import { CartService } from '@services/cart.service';
 import { KeycloakService } from '@services/keycloak.service';
 import { ProductResponse } from '@models/product-response.model';
+import { Subscription, timer } from 'rxjs';
 
 @Component({
   selector: 'app-product-list',
@@ -18,6 +19,9 @@ export class ProductListComponent implements OnInit {
   loading = false;
   error: string | null = null;
   fallbackImage = 'assets/fallback.png';
+  showAddedMessage = false;
+
+  private subs: Subscription[] = [];
 
   constructor(
     private productService: ProductService,
@@ -39,6 +43,11 @@ export class ProductListComponent implements OnInit {
         this.loading = false;
       }
     });
+
+    this.subs.push(this.cartService.cart$.subscribe(cart => {
+      // 👁️‍🗨️ utile per debug ma non strettamente necessario
+      console.log('Carrello aggiornato:', cart);
+    }));
   }
 
   addToCart(productId: number): void {
@@ -48,12 +57,27 @@ export class ProductListComponent implements OnInit {
     }
 
     this.cartService.addItem(productId, 1).subscribe({
-      next: cart => console.log('Aggiunto al carrello', cart),
-      error: err => console.error('Errore aggiunta al carrello', err)
+      next: cart => {
+        console.log('✅ Aggiunto al carrello', cart);
+        this.showToast();
+      },
+      error: err => {
+        console.error('❌ Errore aggiunta al carrello', err);
+        this.error = 'Errore durante l\'aggiunta al carrello.';
+      }
     });
-}
+  }
+
+  showToast(): void {
+    this.showAddedMessage = true;
+    timer(2000).subscribe(() => this.showAddedMessage = false);
+  }
 
   onImageError(event: Event): void {
     (event.target as HTMLImageElement).src = this.fallbackImage;
+  }
+
+  ngOnDestroy(): void {
+    this.subs.forEach(sub => sub.unsubscribe());
   }
 }

@@ -36,26 +36,27 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse createOrder(OrderRequest request, String userId) {
         log.info("Creazione ordine per utente: {}", userId);
 
-        // Recupera l'utente
+        if (request.items() == null || request.items().isEmpty()) {
+            throw new IllegalArgumentException("L'ordine deve contenere almeno un prodotto.");
+        }
+
         LocalUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Utente non trovato: " + userId));
 
-        // Crea l'ordine
         Order order = Order.builder()
                 .user(user)
                 .status(OrderStatus.PENDING)
                 .build();
 
-        // Processa gli item
         List<OrderItem> orderItems = processOrderItems(request.items(), order);
         order.setItems(orderItems);
 
-        // Calcola il totale
         Double subtotal = calculateSubtotal(orderItems);
-        order.setTotal(subtotal);
+        order.setTotal(roundToTwoDecimals(subtotal));
 
-        // Salva l'ordine e aggiorna l'inventario
         Order savedOrder = orderRepository.save(order);
+
+        log.info("Aggiornamento inventario...");
         updateInventory(orderItems);
 
         return mapToOrderResponse(savedOrder);
@@ -71,7 +72,17 @@ public class OrderServiceImpl implements OrderService {
 
         return mapToOrderResponse(order);
     }
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getAllOrders() {
+        log.info("Recupero di tutti gli ordini (admin)");
 
+        List<Order> orders = orderRepository.findAllByOrderByCreatedAtDesc();
+
+        return orders.stream()
+                .map(this::mapToOrderResponse)
+                .collect(Collectors.toList());
+    }
     @Override
     @Transactional(readOnly = true)
     public List<OrderResponse> getUserOrders(String userId) {
@@ -90,40 +101,36 @@ public class OrderServiceImpl implements OrderService {
     private List<OrderItem> processOrderItems(List<OrderItemRequest> itemRequests, Order order) {
         return itemRequests.stream()
                 .map(itemRequest -> {
-                    // Recupera il prodotto
                     Product product = productRepository.findById(itemRequest.productId())
                             .orElseThrow(() -> new NotFoundException("Prodotto non trovato: " + itemRequest.productId()));
 
-                    // Verifica disponibilità
                     Inventory inventory = inventoryRepository.findByProductId(product.getId())
                             .orElseThrow(() -> new NotFoundException("Inventario non trovato per prodotto: " + product.getId()));
 
                     if (inventory.getQuantity() < itemRequest.quantity()) {
-                        throw new InsufficientStockException(
-                                "Stock insufficiente. Disponibili: " + inventory.getQuantity() + ", richiesti: " + itemRequest.quantity());
+                        throw new InsufficientStockException("Stock insufficiente. Disponibili: " + inventory.getQuantity() + ", richiesti: " + itemRequest.quantity());
                     }
 
-                    // Crea l'item
                     Double unitPrice = product.getPrice();
-                    Double subtotal = unitPrice * itemRequest.quantity();
+                    Double subtotal = roundToTwoDecimals(unitPrice * itemRequest.quantity());
 
-                    OrderItem orderItem = OrderItem.builder()
+                    return OrderItem.builder()
                             .order(order)
                             .product(product)
                             .quantity(itemRequest.quantity())
                             .unitPrice(unitPrice)
                             .subtotal(subtotal)
                             .build();
-
-                    return orderItem;
                 })
                 .collect(Collectors.toList());
     }
 
     private Double calculateSubtotal(List<OrderItem> items) {
-        return items.stream()
-                .mapToDouble(item -> item.getSubtotal())
-                .sum();
+        return roundToTwoDecimals(items.stream().mapToDouble(OrderItem::getSubtotal).sum());
+    }
+
+    private Double roundToTwoDecimals(Double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 
     private void updateInventory(List<OrderItem> items) {
@@ -156,18 +163,20 @@ public class OrderServiceImpl implements OrderService {
                 .createdAt(order.getCreatedAt())
                 .build();
     }
+
     @Override
     @Transactional
     public OrderResponse updateOrderStatus(Long orderId, String newStatus) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Ordine non trovato: " + orderId));
+
         try {
-            // Convertiamo la stringa in enum; se la stringa non è valida viene generata un'eccezione
             OrderStatus statusEnum = OrderStatus.valueOf(newStatus.toUpperCase());
             order.setStatus(statusEnum);
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Stato dell'ordine non valido: " + newStatus);
         }
+
         Order updatedOrder = orderRepository.save(order);
         return mapToOrderResponse(updatedOrder);
     }

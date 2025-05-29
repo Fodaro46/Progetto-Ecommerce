@@ -1,107 +1,91 @@
-<div class="order-gestore-container">
-  <h2 class="section-title">Gestione Ordini</h2>
+<div class="order-list-container">
+  <h2 class="section-title">I tuoi ordini</h2>
 
-  <!-- Loader -->
-  <div *ngIf="loading" class="loading-container">
+  <!-- Stato: Caricamento -->
+  <div *ngIf="loading" class="state-container loading">
     <div class="spinner"></div>
     <p>Caricamento ordini in corso...</p>
   </div>
 
-  <!-- Error message -->
-  <div *ngIf="error" class="error-container">
-    <p class="error-message">{{ error }}</p>
-    <button class="retry-button" (click)="loadOrders()">Riprova</button>
+  <!-- Stato: Errore -->
+  <div *ngIf="error" class="state-container error">
+    <p>Si è verificato un errore: {{ error }}</p>
+    <button class="btn retry" (click)="loadOrders()">Riprova</button>
   </div>
 
-  <!-- Empty state -->
-  <div *ngIf="!loading && !error && orders.length === 0" class="empty-state">
-    <p>Non ci sono ordini da visualizzare.</p>
+  <!-- Stato: Nessun ordine -->
+  <div *ngIf="!loading && !error && orders.length === 0" class="state-container empty">
+    <p>Non hai ancora effettuato ordini.</p>
   </div>
 
-  <!-- Orders list -->
-  <div *ngIf="!loading && !error && orders.length > 0" class="orders-list">
+  <!-- Lista ordini -->
+  <div *ngIf="!loading && !error && orders.length > 0" class="orders-wrapper">
     <div class="orders-header">
-      <div class="header-item">ID Ordine</div>
-      <div class="header-item">Data</div>
-      <div class="header-item">Stato</div>
-      <div class="header-item">Totale</div>
-      <div class="header-item">Azioni</div>
+      <div>ID Ordine</div>
+      <div>Data</div>
+      <div>Stato</div>
+      <div>Totale</div>
+      <div>Azioni</div>
     </div>
 
-    <div *ngFor="let order of orders" class="order-item">
+    <div *ngFor="let order of orders" class="order-card">
       <div class="order-summary" (click)="toggleOrderDetail(order.id)">
-        <div class="order-data">{{ order.id }}</div>
-        <div class="order-data">{{ formatDate(order.createdAt) }}</div>
-        <div class="order-data">
-          <span class="status-badge" [ngClass]="'status-' + order.status.toLowerCase()">
+        <div>{{ order.id }}</div>
+        <div>{{ formatDate(order.createdAt) }}</div>
+        <div>
+          <span class="badge" [ngClass]="'status-' + order.status.toLowerCase()">
             {{ order.status || 'N/A' }}
           </span>
         </div>
-        <div class="order-data">€ {{ formatCurrency(order.total) }}</div>
-        <div class="order-data">
-          <button class="detail-toggle" [class.active]="selectedOrderId === order.id.toString()">
+        <div>€ {{ formatCurrency(order.total) }}</div>
+        <div>
+          <button class="btn toggle" (click)="toggleOrderDetail(order.id); $event.stopPropagation()">
             {{ selectedOrderId === order.id.toString() ? 'Nascondi' : 'Dettagli' }}
           </button>
         </div>
       </div>
 
-      <!-- Order details section -->
+      <!-- Dettagli ordine -->
       <div *ngIf="selectedOrderId === order.id.toString()" class="order-details">
         <div class="details-section">
-          <h4>Informazioni generali</h4>
+          <h4>Riepilogo ordine</h4>
+          <div class="detail-row"><strong>ID:</strong> {{ order.id }}</div>
+          <div class="detail-row"><strong>Data:</strong> {{ formatDate(order.createdAt) }}</div>
           <div class="detail-row">
-            <span class="detail-label">ID ordine:</span>
-            <span class="detail-value">{{ order.id }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Email utente:</span>
-            <span class="detail-value">{{ order.userEmail }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Data ordine:</span>
-            <span class="detail-value">{{ formatDate(order.createdAt) }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Stato:</span>
-            <span class="detail-value status-badge" [ngClass]="'status-' + order.status.toLowerCase()">
+            <strong>Stato:</strong>
+            <span class="badge" [ngClass]="'status-' + order.status.toLowerCase()">
               {{ order.status }}
             </span>
           </div>
         </div>
 
-        <!-- Products section -->
         <div class="details-section">
-          <h4>Prodotti</h4>
-          <div *ngIf="order.items && order.items.length > 0" class="product-list">
-            <div class="product-header">
-              <div class="product-header-item">Prodotto</div>
-              <div class="product-header-item">Quantità</div>
-              <div class="product-header-item">Prezzo unitario</div>
-              <div class="product-header-item">Totale</div>
+          <h4>Prodotti acquistati</h4>
+          <div *ngIf="order.items && order.items.length > 0" class="products-table">
+            <div class="table-header">
+              <div>Nome</div>
+              <div>Quantità</div>
+              <div>Prezzo</div>
+              <div>Totale</div>
             </div>
-            <div *ngFor="let item of order.items" class="product-item">
-              <div class="product-data">{{ item.productName || 'N/A' }}</div>
-              <div class="product-data">{{ item.quantity || 1 }}</div>
-              <div class="product-data">€ {{ formatCurrency(item.unitPrice) }}</div>
-              <div class="product-data">€ {{ formatCurrency(item.subtotal) }}</div>
+            <div *ngFor="let item of order.items" class="table-row">
+              <div>{{ item.productName || 'N/A' }}</div>
+              <div>{{ item.quantity }}</div>
+              <div>€ {{ formatCurrency(item.unitPrice) }}</div>
+              <div>€ {{ formatCurrency(item.subtotal) }}</div>
             </div>
           </div>
           <div *ngIf="!order.items || order.items.length === 0" class="no-products">
-            Nessun prodotto disponibile per questo ordine.
+            Nessun prodotto in questo ordine.
           </div>
         </div>
 
-        <!-- Totals section -->
-        <div class="details-section totals-section">
-          <div class="detail-row total">
-            <span class="detail-label">Totale ordine:</span>
-            <span class="detail-value">€ {{ formatCurrency(order.total) }}</span>
-          </div>
+        <div class="details-section total">
+          <div><strong>Totale ordine:</strong> € {{ formatCurrency(order.total) }}</div>
         </div>
 
-        <!-- Actions on the order -->
-        <div class="order-actions">
-          <button class="action-button secondary" (click)="toggleOrderDetail(order.id)">Chiudi</button>
+        <div class="details-actions">
+          <button class="btn secondary" (click)="toggleOrderDetail(order.id)">Chiudi</button>
         </div>
       </div>
     </div>

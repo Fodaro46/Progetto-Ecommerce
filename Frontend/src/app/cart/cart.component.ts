@@ -1,3 +1,4 @@
+
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
@@ -26,33 +27,26 @@ export class CartComponent implements OnInit {
       return;
     }
 
-    this.cartService.fetchActiveCart().subscribe({
-      next: cart => this.cart = cart,
-      error: err => console.error('Errore caricamento carrello', err)
-    });
+    this.cartService.cart$.subscribe(cart => this.cart = cart);
+    this.cartService.fetchActiveCart().subscribe();
+  }
+
+  updateQuantityFromEvent(item: CartItemResponse, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = Number(input.value);
+    if (value > 0) this.updateQuantity(item, value);
   }
 
   updateQuantity(item: CartItemResponse, newQuantity: number): void {
-    if (newQuantity > 0) {
-      this.cartService.updateItem(item.id, newQuantity).subscribe({
-        next: cart => this.cart = cart,
-        error: err => console.error('Errore aggiornamento quantità', err)
-      });
-    }
+    this.cartService.updateItem(item.id, newQuantity).subscribe();
   }
 
   removeItem(item: CartItemResponse): void {
-    this.cartService.removeItem(item.id).subscribe({
-      next: cart => this.cart = cart,
-      error: err => console.error('Errore rimozione item', err)
-    });
+    this.cartService.removeItem(item.id).subscribe();
   }
 
   clearCart(): void {
-    this.cartService.clearCart().subscribe({
-      next: () => this.cart = null,
-      error: err => console.error('Errore svuotamento carrello', err)
-    });
+    this.cartService.clearCart().subscribe();
   }
 
   proceedToCheckout(): void {

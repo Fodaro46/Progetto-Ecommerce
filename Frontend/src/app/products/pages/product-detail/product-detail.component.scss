@@ -9,15 +9,36 @@
 
   .img-container {
     width: 100%;
-    height: 400px;
+    aspect-ratio: 4 / 3; // mantiene rapporto immagine naturale
     margin-bottom: 20px;
     background-color: #222;
     border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+    position: relative;
 
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      border-radius: 8px;
+      transition: transform 0.4s ease, filter 0.4s ease;
+      display: block;
+
+      &:hover {
+        transform: scale(1.05);
+        filter: brightness(1.1);
+      }
+    }
+
+    /* Placeholder visivo (opzionale), si attiva se src non caricato */
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #333 25%, #444 50%, #333 75%);
+      opacity: 0.15;
+      pointer-events: none;
       border-radius: 8px;
     }
   }

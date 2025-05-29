@@ -2,7 +2,6 @@
   <div class="logo" routerLink="/home">V3rc1</div>
 
   <ul class="nav-links">
-    <li><a routerLink="/products">Prodotti</a></li>
     <li *ngIf="isAuthenticated$ | async">
       <a routerLink="/orders">I tuoi ordini</a>
     </li>

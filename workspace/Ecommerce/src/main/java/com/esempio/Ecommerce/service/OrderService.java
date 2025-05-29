@@ -30,7 +30,6 @@ public interface OrderService {
      * @return Lista degli ordini dell'utente
      */
     List<OrderResponse> getUserOrders(String userId);
-
-
+    List<OrderResponse> getAllOrders();
     OrderResponse updateOrderStatus(Long orderId, String newStatus);
 }

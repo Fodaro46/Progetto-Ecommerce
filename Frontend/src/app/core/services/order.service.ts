@@ -7,7 +7,6 @@ import { OrderResponse } from '@models/order-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
-  // URL direttamente “hard-coded”
   private apiUrl = 'http://localhost:8083/api/orders';
 
   constructor(private http: HttpClient) {}
@@ -32,7 +31,12 @@ export class OrderService {
 
   updateOrderStatus(orderId: number, newStatus: string): Observable<void> {
     return this.http
-      .put<void>(`${this.apiUrl}/${orderId}/status`, { status: newStatus })
+      .put<void>(`${this.apiUrl}/${orderId}/status?newStatus=${newStatus}`, {})
+      .pipe(catchError(err => throwError(() => err)));
+  }
+  getAllOrders(): Observable<OrderResponse[]> {
+    return this.http
+      .get<OrderResponse[]>(this.apiUrl, { withCredentials: true })
       .pipe(catchError(err => throwError(() => err)));
   }
 }

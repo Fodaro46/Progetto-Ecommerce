@@ -43,4 +43,18 @@ export class ProductService {
       catchError((error) => throwError(() => error))
     );
   }
+
+  // Metodo per aggiornare solo la quantità del prodotto
+  updateQuantity(productId: number, newQuantity: number): Observable<void> {
+    return this.http.put<void>(
+      `${this.baseUrl}/${productId}/quantity`,
+      null,
+      {
+        params: { newQuantity: newQuantity.toString() },
+        withCredentials: true
+      }
+    ).pipe(
+      catchError((error) => throwError(() => error))
+    );
+  }
 }

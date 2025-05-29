@@ -55,4 +55,11 @@ public class OrderController {
         OrderResponse response = orderService.updateOrderStatus(orderId, newStatus);
         return ResponseEntity.ok(response);
     }
+    @GetMapping
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<List<OrderResponse>> getAllOrders() {
+        List<OrderResponse> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(orders);
+    }
+
 }
