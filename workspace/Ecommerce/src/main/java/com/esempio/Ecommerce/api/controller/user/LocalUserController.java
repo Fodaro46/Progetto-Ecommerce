@@ -9,33 +9,45 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
-@Controller
+@RestController
 @RequestMapping("/localuser")
 public class LocalUserController {
     @Autowired
     private UserService userService;
 
+    private void ensureAuthenticated(Jwt tokenUser) {
+        if (tokenUser == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Effettua il login per accedere alla sezione profilo"
+            );
+        }
+    }
+
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@AuthenticationPrincipal Jwt tokenuser) {
-        String keycloakId=tokenuser.getClaimAsString("sub");
+    public ResponseEntity<?> registerUser(@AuthenticationPrincipal Jwt tokenUser) {
+        ensureAuthenticated(tokenUser);
+        String keycloakId = tokenUser.getClaimAsString("sub");
         Optional<LocalUser> l = userService.findLocalUserById(keycloakId);
-        if(l.isPresent()) {
+        if (l.isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Utente già registrato");
         }
-        return ResponseEntity.ok(userService.registerOrUpdateUser(tokenuser));
+        return ResponseEntity.ok(userService.registerOrUpdateUser(tokenUser));
     }
+
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
-        // Qui non facciamo altro che inviare una risposta per indicare il logout
         return ResponseEntity.ok("Logout effettuato con successo. Rimuovi il token dal client.");
     }
+
     @GetMapping("/me")
     public ResponseEntity<LocalUser> getCurrentUser(@AuthenticationPrincipal Jwt tokenUser) {
+        ensureAuthenticated(tokenUser);
         String keycloakId = tokenUser.getClaimAsString("sub");
         Optional<LocalUser> userOpt = userService.findLocalUserById(keycloakId);
         return userOpt.map(ResponseEntity::ok)
@@ -46,8 +58,15 @@ public class LocalUserController {
     public ResponseEntity<LocalUser> updateCurrentUser(
             @AuthenticationPrincipal Jwt tokenUser,
             @Valid @RequestBody UserRequest updateRequest) {
+        ensureAuthenticated(tokenUser);
         String keycloakId = tokenUser.getClaimAsString("sub");
         LocalUser updatedUser = userService.updateUser(keycloakId, updateRequest);
         return ResponseEntity.ok(updatedUser);
+    }
+
+    @PostMapping("/sync")
+    public ResponseEntity<LocalUser> syncUser(@AuthenticationPrincipal Jwt tokenUser) {
+        ensureAuthenticated(tokenUser);
+        return ResponseEntity.ok(userService.registerOrUpdateUser(tokenUser));
     }
 }

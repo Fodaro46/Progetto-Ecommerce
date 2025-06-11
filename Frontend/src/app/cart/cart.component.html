@@ -1,20 +1,26 @@
 <div class="cart-container" *ngIf="cart; else emptyCart">
-  <h2>Il tuo Carrello</h2>
+  <button class="back-button" (click)="goBackToProducts()">← Torna ai prodotti</button>
+
+  <h2 class="cart-title">Il tuo Carrello</h2>
 
   <div *ngFor="let item of cart.items">
     <div class="item">
       <img [src]="item.productImageUrl" alt="{{ item.productName }}" />
       <div class="details">
-        <p><strong>{{ item.productName }}</strong></p>
-        <p>Prezzo unitario: € {{ item.unitPrice }}</p>
-        <p>Totale: € {{ item.totalPrice }}</p>
-        <input
-          type="number"
-          [value]="item.quantity"
-          (change)="updateQuantityFromEvent(item, $event)"
-          min="1"
-        />
-        <button (click)="removeItem(item)">Rimuovi</button>
+        <div class="info">
+          <p><strong>{{ item.productName }}</strong></p>
+          <p>Prezzo unitario: € {{ item.unitPrice }}</p>
+          <p>Totale: € {{ item.totalPrice }}</p>
+        </div>
+        <div class="actions">
+          <input
+            type="number"
+            [value]="item.quantity"
+            (change)="updateQuantityFromEvent(item, $event)"
+            min="1"
+          />
+          <button (click)="removeItem(item)">Rimuovi</button>
+        </div>
       </div>
     </div>
   </div>
@@ -25,7 +31,7 @@
   </div>
 
   <div class="cart-actions">
-    <button (click)="clearCart()">Svuota carrello</button>
+    <button class="clear" (click)="clearCart()">Svuota carrello</button>
     <button (click)="proceedToCheckout()">Procedi al Checkout</button>
   </div>
 </div>

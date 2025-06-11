@@ -21,7 +21,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ROLE_utente')")
+    @PreAuthorize("hasAuthority('ROLE_client_utente')")
     public ResponseEntity<OrderResponse> createOrder(
             @RequestBody OrderRequest request,
             @AuthenticationPrincipal Jwt jwt
@@ -34,13 +34,13 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ROLE_utente') or hasRole('admin')")
+    @PreAuthorize("hasAuthority('ROLE_client_utente') or hasRole('admin')")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.getOrderById(id));
     }
 
     @GetMapping("/my")
-    @PreAuthorize("hasAuthority('ROLE_utente')")
+    @PreAuthorize("hasAuthority('ROLE_client_utente')")
     public ResponseEntity<List<OrderResponse>> getMyOrders(@AuthenticationPrincipal Jwt jwt) {
         List<OrderResponse> orders = orderService.getUserOrders(jwt.getSubject());
         return ResponseEntity.ok(orders);

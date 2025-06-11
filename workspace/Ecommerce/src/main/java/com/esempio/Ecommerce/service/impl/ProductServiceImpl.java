@@ -8,8 +8,10 @@ import com.esempio.Ecommerce.domain.entity.Product;
 import com.esempio.Ecommerce.api.repository.InventoryRepository;
 import com.esempio.Ecommerce.api.repository.ProductRepository;
 import com.esempio.Ecommerce.service.ProductService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,6 +35,11 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findAll().stream()
                 .map(productMapper::toDto)
                 .collect(Collectors.toList());
+    }
+    @Override
+    public Page<ProductResponse> getPaginatedProducts(Pageable pageable) {
+        return productRepository.findAll(pageable)
+                .map(productMapper::toDto);
     }
 
     @Override

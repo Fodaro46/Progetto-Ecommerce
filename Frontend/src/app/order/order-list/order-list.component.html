@@ -1,5 +1,8 @@
 <div class="order-list-container">
   <h2 class="section-title">I tuoi ordini</h2>
+  <div class="back-home-wrapper">
+    <button class="btn-back-home" (click)="goHome()">🏠 Torna alla Home</button>
+  </div>
 
   <!-- Stato: Caricamento -->
   <div *ngIf="loading" class="state-container loading">

@@ -47,7 +47,6 @@ public class Order {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    // Metodo helper per aggiungere un item e mantenere la relazione bidirezionale
     public void addItem(OrderItem item) {
         items.add(item);
         item.setOrder(this);

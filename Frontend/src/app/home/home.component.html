@@ -1,15 +1,32 @@
 <div class="home-container">
+  <!-- Video di sfondo -->
   <video #videoElement id="promoVideo" autoplay muted playsinline class="background-video">
     <source [src]="backgroundVideoUrl" type="video/mp4" />
     Il tuo browser non supporta i video HTML5.
   </video>
   <div class="dark-overlay"></div>
 
+  <!-- Azioni in alto a destra -->
+  <div class="actions">
+    <button class="btn-mute" (click)="toggleMute()">
+      {{ isMuted ? '🔇' : '🔊' }}
+    </button>
+
+    <!-- Profilo: compare solo se isLoggedIn = true -->
+    <button *ngIf="isLoggedIn" class="btn-profile" routerLink="/profile">
+      👤 Profilo
+    </button>
+    <!-- Altrimenti Login -->
+    <button *ngIf="!isLoggedIn" class="btn-profile" (click)="login()">
+      🔑 Login
+    </button>
+  </div>
+
+  <!-- Contenuto centrale -->
   <div class="content">
     <h1 class="motto">V3rc1</h1>
     <p class="sub">Eat good. Train consistent. Run hard.</p>
 
-    <!-- Bottone per navigare alla lista prodotti -->
     <button routerLink="/products" class="btn-products">
       Guarda Prodotti
     </button>

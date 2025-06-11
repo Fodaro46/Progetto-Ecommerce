@@ -17,6 +17,8 @@ export class ProductDetailComponent implements OnInit {
   product: ProductResponse | null = null;
   loading = false;
   error: string | null = null;
+  showAddedMessage = false;
+  showLoginMessage = false;
 
   constructor(
     private productService: ProductService,
@@ -33,6 +35,8 @@ export class ProductDetailComponent implements OnInit {
   private loadProductDetail(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.loading = true;
+    this.error = null;
+
     this.productService.getProductById(id).subscribe({
       next: data => {
         this.product = data;
@@ -56,13 +60,29 @@ export class ProductDetailComponent implements OnInit {
 
     const tokenExpired = await this.keycloakService.isTokenExpired();
     if (tokenExpired) {
-      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url }});
+      this.showLoginMessage = true;
+      setTimeout(() => (this.showLoginMessage = false), 2500);
+      await this.keycloakService.login(window.location.origin + this.router.url);
       return;
     }
 
     this.cartService.addItem(this.product.id, 1).subscribe({
-      next: () => console.log('Aggiunto al carrello'),
-      error: (err: any) => console.error('Errore aggiunta', err)
+      next: () => {
+        this.showAddedMessage = true;
+        setTimeout(() => (this.showAddedMessage = false), 2000);
+      },
+      error: err => {
+        console.error(err);
+        alert('Errore durante l\'aggiunta al carrello.');
+      }
     });
+  }
+
+  onImageError(event: Event): void {
+    (event.target as HTMLImageElement).src = 'assets/fallback.png';
+  }
+
+  goBack(): void {
+    this.router.navigate(['/products']);
   }
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { OrderResponse } from '@models/order-response.model';
 import { OrderService } from '@services/order.service';
 import { Observable } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-order-list',
@@ -17,7 +18,10 @@ export class OrderListComponent implements OnInit {
   error: string | null = null;
   selectedOrderId: string | null = null;
 
-  constructor(private orderService: OrderService) {}
+  constructor(
+    private orderService: OrderService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadOrders();
@@ -56,5 +60,8 @@ export class OrderListComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+  goHome(): void {
+    this.router.navigate(['/home']);
   }
 }

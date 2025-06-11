@@ -1,3 +1,4 @@
+/* product-detail.component.scss */
 .product-detail {
   text-align: center;
   background-color: #111;
@@ -7,39 +8,30 @@
   max-width: 800px;
   margin: 0 auto;
 
+  /* box fisso per l’immagine, img sempre riempita */
   .img-container {
     width: 100%;
-    aspect-ratio: 4 / 3; // mantiene rapporto immagine naturale
+    height: 320px;
     margin-bottom: 20px;
     background-color: #222;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
-    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      border-radius: 8px;
+      object-fit: contain;
+      object-position: center;
       transition: transform 0.4s ease, filter 0.4s ease;
-      display: block;
 
       &:hover {
-        transform: scale(1.05);
+        transform: scale(1.03);
         filter: brightness(1.1);
       }
-    }
-
-    /* Placeholder visivo (opzionale), si attiva se src non caricato */
-    &::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, #333 25%, #444 50%, #333 75%);
-      opacity: 0.15;
-      pointer-events: none;
-      border-radius: 8px;
     }
   }
 
@@ -53,7 +45,7 @@
     color: #bbb;
   }
 
-  button {
+  .add-btn {
     background-color: #ff6700;
     color: #fff;
     font-size: 1rem;
@@ -61,15 +53,40 @@
     border: none;
     border-radius: 6px;
     cursor: pointer;
+    margin-top: 1rem;
     transition: background-color 0.3s;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: #ff4e00;
     }
-
     &:disabled {
       background-color: #666;
       cursor: not-allowed;
     }
   }
+}
+
+.loading,
+.error {
+  text-align: center;
+  margin: 1.5rem 0;
+  color: #bbb;
+}
+
+.error {
+  color: #f44336;
+}
+
+/* (opzionale) toast locale anche qui */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #4caf50;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  font-weight: bold;
 }

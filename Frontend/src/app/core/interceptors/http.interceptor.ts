@@ -16,7 +16,7 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
 
         if (!refreshedToken) {
           console.warn('[Interceptor] Nessun token disponibile dopo il refresh, invio richiesta senza header Authorization.');
-          return next(req); // Invia comunque la richiesta se il refresh fallisce
+          return next(req);
         }
 
         const authReq = req.clone({
@@ -31,7 +31,7 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
     );
   }
 
-  // Token valido → lo allego direttamente
+
   const authReq = req.clone({
     setHeaders: {
       Authorization: `Bearer ${token}`

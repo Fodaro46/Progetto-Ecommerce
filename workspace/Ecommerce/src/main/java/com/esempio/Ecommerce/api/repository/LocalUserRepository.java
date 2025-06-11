@@ -8,7 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface LocalUserRepository extends JpaRepository<LocalUser, String> {
-    // Rimosso il metodo findByUsernameIgnoreCase che causava l'errore
 
     Optional<LocalUser> findByEmailIgnoreCase(String email);
 }

@@ -1,0 +1,76 @@
+<!-- toast locale -->
+<div *ngIf="showAddedMessage" class="toast">
+  ✅ Prodotto aggiunto al carrello!
+</div>
+<div class="back-home-wrapper">
+  <button routerLink="/home" class="btn-back-home">🏠 Torna alla Home</button>
+</div>
+
+<section class="products-container">
+
+  <!-- spinner -->
+  <div *ngIf="loading" class="spinner-container">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+
+  <!-- errore -->
+  <p *ngIf="!loading && error" class="error">{{ error }}</p>
+
+  <!-- vuoto -->
+  <p *ngIf="!loading && !error && products.length === 0" class="empty">
+    Nessun prodotto disponibile.
+  </p>
+
+  <!-- card products -->
+  <div
+    class="product-card"
+    *ngFor="let product of products; trackBy: trackByProduct"
+  >
+    <a [routerLink]="['/products', product.id]">
+      <div class="img-container">
+        <img
+          [src]="product.imageUrl"
+          alt="{{ product.name }}"
+          loading="lazy"
+          (error)="onImageError($event)"
+        />
+      </div>
+    </a>
+
+    <div class="product-info">
+      <h3 class="clickable-title">
+        <a [routerLink]="['/products', product.id]">{{ product.name }}</a>
+      </h3>
+
+      <p class="description">{{ product.description }}</p>
+      <p class="price">€ {{ product.price.toFixed(2) }}</p>
+
+      <p
+        class="availability"
+        [ngClass]="{ 'in-stock': product.inStock, 'out-of-stock': !product.inStock }"
+      >
+        {{ product.inStock ? 'Disponibile' : 'Esaurito' }}
+      </p>
+
+      <p *ngIf="product.inStock">
+        <strong>Quantità rim.: </strong>{{ product.availableQuantity }}
+      </p>
+
+      <button
+        class="add-to-cart"
+        [disabled]="!product.inStock"
+        (click)="addToCart(product)"
+      >
+        Aggiungi
+      </button>
+    </div>
+  </div>
+</section>
+
+<mat-paginator
+  class="paginator"
+  [length]="totalItems"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="[4, 8, 12]"
+  (page)="onPageChange($event)"
+></mat-paginator>

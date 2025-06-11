@@ -30,7 +30,9 @@ export class CartComponent implements OnInit {
     this.cartService.cart$.subscribe(cart => this.cart = cart);
     this.cartService.fetchActiveCart().subscribe();
   }
-
+  goBackToProducts(): void {
+    this.router.navigate(['/products']);
+  }
   updateQuantityFromEvent(item: CartItemResponse, event: Event): void {
     const input = event.target as HTMLInputElement;
     const value = Number(input.value);

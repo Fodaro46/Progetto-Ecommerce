@@ -1,6 +1,16 @@
+<!-- toast locale -->
+<div *ngIf="showAddedMessage" class="toast">
+  ✅ Prodotto aggiunto al carrello!
+</div>
+
+<!-- dettaglio prodotto -->
 <div *ngIf="product; else loadingOrError" class="product-detail">
   <div class="img-container">
-    <img [src]="product.imageUrl" alt="{{ product.name }}" />
+    <img
+      [src]="product.imageUrl"
+      alt="{{ product.name }}"
+      (error)="onImageError($event)"
+    />
   </div>
   <h2>{{ product.name }}</h2>
   <p>{{ product.description }}</p>
@@ -13,6 +23,7 @@
     <strong>Quantità disponibile:</strong> {{ product.availableQuantity }}
   </p>
   <button
+    class="add-btn"
     (click)="addToCart()"
     [disabled]="!product.inStock"
   >
@@ -21,6 +32,9 @@
 </div>
 
 <ng-template #loadingOrError>
-  <div *ngIf="loading">Caricamento prodotto...</div>
-  <div *ngIf="error">{{ error }}</div>
+  <div *ngIf="loading" class="loading">Caricamento prodotto...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
 </ng-template>
+<div class="back-home-wrapper">
+  <button class="btn-back-home" (click)="goBack()">🔙 Torna ai prodotti</button>
+</div>

@@ -1,0 +1,11 @@
+<div class="profile-container" *ngIf="user">
+  <h2>Profilo Utente</h2>
+  <p><strong>ID:</strong> {{ user.id }}</p>
+  <p><strong>Email:</strong> {{ user.email }}</p>
+  <p><strong>Nome:</strong> {{ user.firstName || '—' }}</p>
+  <p><strong>Cognome:</strong> {{ user.lastName || '—' }}</p>
+  <p><strong>Creato il:</strong> {{ user.createdAt | date:'medium' }}</p>
+  <p><strong>Aggiornato il:</strong> {{ user.updatedAt | date:'medium' }}</p>
+
+  <button class="btn-home" routerLink="/home">🏠 Torna alla Home</button>
+</div>

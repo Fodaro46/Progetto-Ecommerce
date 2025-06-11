@@ -5,10 +5,11 @@
   background-color: #121212;
   min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
 }
 
 .cart-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   background-color: #1e1e1e;
   border-radius: 12px;
@@ -19,6 +20,28 @@
   gap: 1.5rem;
 }
 
+.back-button {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: #00b894;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: -1rem;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #55efc4;
+    text-decoration: underline;
+  }
+
+  &:focus {
+    outline: 2px solid #00b894;
+    outline-offset: 2px;
+  }
+}
+
 .cart-title {
   font-size: 2rem;
   margin-bottom: 1.5rem;
@@ -27,72 +50,86 @@
   text-align: center;
 }
 
-.cart-item {
+.item {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  align-items: flex-start;
+  gap: 1.5rem;
   margin-bottom: 1.5rem;
   border-bottom: 1px solid #333;
   padding-bottom: 1rem;
+  transition: all 0.3s ease;
 
   img {
-    width: 80px;
-    height: 80px;
+    width: 300px;
+    height: 400px;
     object-fit: cover;
+    object-position: center;
     border-radius: 8px;
+    background-color: #1a1a1a;
     border: 1px solid #444;
     flex-shrink: 0;
   }
 
   .details {
-    flex-grow: 1;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    justify-content: space-between;
+    min-height: 200px;
 
-    p {
-      margin: 0.25rem 0;
-      font-size: 1rem;
-      color: #ddd;
-    }
+    .info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
 
-    input[type="number"] {
-      width: 70px;
-      padding: 0.4rem 0.5rem;
-      background-color: #2a2a2a;
-      border: 1px solid #555;
-      color: #f0f0f0;
-      border-radius: 6px;
-      font-size: 1rem;
-      transition: border-color 0.3s;
-
-      &:focus {
-        outline: none;
-        border-color: #00b894;
-        box-shadow: 0 0 6px #00b894;
+      p {
+        margin: 0;
+        font-size: 1rem;
+        color: #ddd;
       }
     }
 
-    button {
-      margin-top: 0.5rem;
-      align-self: flex-start;
-      background-color: #ff4d4d;
-      border: none;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      font-size: 0.95rem;
+    .actions {
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
 
-      &:hover {
-        background-color: #ff1f1f;
+      input[type='number'] {
+        width: 70px;
+        padding: 0.4rem 0.5rem;
+        background-color: #2a2a2a;
+        border: 1px solid #555;
+        color: #f0f0f0;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+
+        &:focus {
+          outline: none;
+          border-color: #00b894;
+          box-shadow: 0 0 6px #00b894;
+        }
       }
 
-      &:focus {
-        outline: 3px solid #ff6f6f;
-        outline-offset: 2px;
+      button {
+        background-color: #ff4d4d;
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-size: 0.95rem;
+
+        &:hover {
+          background-color: #ff1f1f;
+        }
+
+        &:focus {
+          outline: 3px solid #ff6f6f;
+          outline-offset: 2px;
+        }
       }
     }
   }
@@ -150,20 +187,40 @@
   }
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .cart-container {
-    padding: 1.5rem;
+.empty-cart {
+  text-align: center;
+  margin-top: 2rem;
+
+  h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
   }
 
-  .cart-item {
+  a {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: #00b894;
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: #019875;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .item {
     flex-direction: column;
     align-items: flex-start;
 
     img {
       width: 100%;
-      height: auto;
-      max-height: 220px;
+      height: 240px;
+      object-fit: cover;
       border-radius: 12px;
     }
 

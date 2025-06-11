@@ -17,7 +17,6 @@ export class KeycloakService {
 
   get keycloak(): KeycloakInstance {
     if (!this._keycloak) {
-      console.log('[KeycloakService] Inizializzazione client Keycloak');
       this._keycloak = new Keycloak({
         url: 'http://localhost:8080',
         realm: 'Vercarix',
@@ -36,8 +35,7 @@ export class KeycloakService {
   }
 
   getAuthorizationHeaderValue(): string | null {
-    if (!this.token) return null;
-    return `Bearer ${this.token}`;
+    return this.token ? `Bearer ${this.token}` : null;
   }
 
   isTokenExpired(): boolean {
@@ -47,18 +45,16 @@ export class KeycloakService {
   async init(): Promise<boolean> {
     try {
       const authenticated = await this.keycloak.init({
-        onLoad: 'check-sso', // Usa 'login-required' per forzare il login all'apertura
+        onLoad: 'check-sso',
         silentCheckSsoRedirectUri: `${window.location.origin}/assets/silent-check-sso.html`,
         checkLoginIframe: true,
         checkLoginIframeInterval: 30,
       });
 
-      console.log(`[KeycloakService] Autenticazione iniziale: ${authenticated}`);
       this._isAuthenticated.next(authenticated);
 
       if (authenticated) {
         const userProfile = await this.keycloak.loadUserProfile();
-        console.log('[KeycloakService] Profilo utente caricato:', userProfile);
 
         this._profile.next({
           id: this.keycloak.subject || '',
@@ -68,34 +64,32 @@ export class KeycloakService {
           lastName: userProfile.lastName ?? '',
         });
 
-        // Redirect automatico se utente è admin
+        await this.syncUserToBackend();
+
         if (this.hasRealmRole('admin')) {
           const currentPath = window.location.pathname;
           if (currentPath === '/' || currentPath === '/home') {
-            console.log('[KeycloakService] Utente admin: redirect verso /admin');
             this.router.navigate(['/admin']);
           }
         }
 
-        // Gestione scadenza token
-        this.keycloak.onTokenExpired = () => {
-          console.warn('[KeycloakService] Token scaduto, tentativo di refresh...');
-          this.refreshToken();
+        this.keycloak.onTokenExpired = async () => {
+          try {
+            await this.refreshToken();
+          } catch {
+          }
         };
-      } else {
-        console.warn('[KeycloakService] Utente non autenticato');
       }
 
       return authenticated;
     } catch (error) {
-      console.error('[KeycloakService] Errore durante init():', error);
+      console.debug('[KeycloakService] init() fallita o bypassata:', error);
       return false;
     }
   }
 
   async login(redirectUri?: string): Promise<void> {
     try {
-      console.log('[KeycloakService] Redirect al login...');
       await this.keycloak.login({ redirectUri: redirectUri || window.location.origin });
     } catch (error) {
       console.error('[KeycloakService] Errore durante login():', error);
@@ -104,7 +98,6 @@ export class KeycloakService {
 
   async register(redirectUri?: string): Promise<void> {
     try {
-      console.log('[KeycloakService] Redirect alla registrazione...');
       await this.keycloak.register({ redirectUri: redirectUri || window.location.origin });
     } catch (error) {
       console.error('[KeycloakService] Errore durante register():', error);
@@ -113,7 +106,6 @@ export class KeycloakService {
 
   async logout(redirectUri?: string): Promise<void> {
     try {
-      console.log('[KeycloakService] Logout in corso...');
       this._profile.next(null);
       this._isAuthenticated.next(false);
       await this.keycloak.logout({ redirectUri: redirectUri || window.location.origin });
@@ -123,37 +115,54 @@ export class KeycloakService {
   }
 
   async refreshToken(): Promise<boolean> {
+    if (!this._isAuthenticated.value || !this.token) return false;
+
     try {
       const refreshed = await this.keycloak.updateToken(30);
       if (refreshed) {
-        console.log('[KeycloakService] Token aggiornato con successo');
-      } else {
-        console.warn('[KeycloakService] Token ancora valido, non aggiornato');
+        console.debug('[KeycloakService] Token aggiornato');
       }
-      return refreshed;
-    } catch (error) {
-      console.error('[KeycloakService] Impossibile aggiornare il token:', error);
+      return true;
+    } catch {
       this._isAuthenticated.next(false);
       return false;
     }
   }
 
   hasRealmRole(role: string): boolean {
-    const hasRole = this.keycloak.realmAccess?.roles.includes(role) ?? false;
-    console.log(`[KeycloakService] Verifica ruolo "${role}": ${hasRole}`);
-    return hasRole;
+    return this.keycloak.realmAccess?.roles.includes(role) ?? false;
   }
+
   hasClientRole(role: string, clientId: string): boolean {
     const clientRoles = this.keycloak.resourceAccess?.[clientId]?.roles || [];
-    const hasRole = clientRoles.includes(role);
-    console.log(`[KeycloakService] Verifica ruolo client "${role}": ${hasRole}`);
-    return hasRole;
+    return clientRoles.includes(role);
   }
 
   hasResourceRole(role: string, resource: string): boolean {
     return this.keycloak.hasResourceRole(role, resource);
   }
-  public get isLoggedIn(): boolean {
+
+  get isLoggedIn(): boolean {
     return this._isAuthenticated.value;
+  }
+
+  private async syncUserToBackend(): Promise<void> {
+    const token = this.token;
+    if (!token) return;
+
+    try {
+      const response = await fetch('http://localhost:8083/localuser/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        console.warn('[KeycloakService] Sync fallita:', response.statusText);
+      }
+    } catch (error) {
+      console.debug('[KeycloakService] Errore silenzioso durante la sync:', error);
+    }
   }
 }

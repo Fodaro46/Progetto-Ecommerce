@@ -3,13 +3,13 @@ import { inject } from '@angular/core';
 import { KeycloakService } from '@services/keycloak.service';
 
 export const AuthOnlyGuard: CanActivateFn = () => {
-  const keycloakService = inject(KeycloakService);
+  const keycloak = inject(KeycloakService);
   const router = inject(Router);
 
-  if (keycloakService.isTokenExpired()) {
+  if (keycloak.isTokenExpired()) {
+    alert('Effettua il login per accedere alla sezione profilo');
     router.navigate(['/login']);
     return false;
   }
-
   return true;
 };
