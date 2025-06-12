@@ -24,20 +24,17 @@ public class ProductController {
         this.productService = productService;
     }
 
-    /** Lista tutti i prodotti come DTO */
     @GetMapping
     public List<ProductResponse> getProducts() {
         return productService.getProducts();
     }
 
-    /** Ottieni un singolo prodotto */
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
         ProductResponse dto = productService.getProductById(id);
         return ResponseEntity.ok(dto);
     }
 
-    /** Crea un nuovo prodotto (solo admin) */
     @PostMapping
     @PreAuthorize("hasRole('admin')")
     public ResponseEntity<ProductResponse> addProduct(
@@ -46,7 +43,6 @@ public class ProductController {
         return ResponseEntity.ok(dto);
     }
 
-    /** Elimina un prodotto (solo admin) */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('admin')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
@@ -62,7 +58,6 @@ public class ProductController {
         return ResponseEntity.ok(productService.getPaginatedProducts(pageable));
     }
 
-    /** Aggiorna la quantità in magazzino */
     @PutMapping("/{productId}/quantity")
     public ResponseEntity<Void> updateProductQuantity(
             @PathVariable Long productId,
@@ -71,7 +66,6 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
-    /** Ricerca / filtro prodotti */
     @GetMapping("/search")
     public ResponseEntity<List<ProductResponse>> searchProducts(
             @RequestParam(required = false) String name,

@@ -7,6 +7,7 @@ import com.esempio.Ecommerce.domain.entity.CartItem;
 import java.util.List;
 
 public interface CartItemService {
+
     CartItemResponse addItemToCart(CartItemRequest request);
     List<CartItemResponse> getItemsByCartId(Long cartId);
     CartItemResponse updateItemQuantity(Long cartItemId, Integer quantity);

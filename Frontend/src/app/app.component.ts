@@ -18,6 +18,9 @@ import { NavbarComponent } from '@shared/navbar/navbar.component';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
+  title(title: any) {
+      throw new Error('Method not implemented.');
+  }
   isAdminRoute = false;
   routeChecked = false; // ⬅️ nuova flag
 
